@@ -1428,10 +1428,22 @@ function copyLetter() {
 
 /* ── DOWNLOAD PDF ───────────────────────────────────────────── */
 function downloadPDF() {
-  // Find the letter preview area - adjust selector if needed
-  let letterContent = document.querySelector('#live-preview, #letter-content, .letter-preview, .live-preview');
+  // More reliable way to find the letter preview
+  let letterContent = 
+    document.getElementById('letter-content') || 
+    document.getElementById('live-preview') || 
+    document.querySelector('.live-preview') || 
+    document.querySelector('#preview-content') ||
+    document.querySelector('.letter-preview');
 
-  if (!letterContent || letterContent.innerHTML.trim().length < 50) {
+  // Also try to find the actual content area inside preview
+  if (!letterContent) {
+    letterContent = document.querySelector('.prose') || 
+                    document.querySelector('article') || 
+                    document.querySelector('.max-w-2xl');
+  }
+
+  if (!letterContent || letterContent.innerHTML.trim().length < 100) {
     alert("No letter generated yet. Please generate a letter first.");
     return;
   }

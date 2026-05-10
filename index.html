@@ -8,26 +8,29 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
-  /* Print Styles for Clean PDF */
+/* Print Styles for Clean PDF */
 @media print {
   body * {
     visibility: hidden;
   }
-  #letter-content, #letter-content * {
+  #letter-doc, #letter-doc * {
     visibility: visible;
   }
-  #letter-content {
+  #letter-doc {
     position: absolute;
     left: 0;
     top: 0;
     width: 100%;
-    padding: 40px;
+    padding: 60px 50px;
     font-family: 'Times New Roman', serif;
-    font-size: 12pt;
+    font-size: 13pt;
     line-height: 1.8;
     color: #000;
+    white-space: pre-wrap;
+    background: white;
   }
-  nav, .progress-bar, .live-preview-header, .letter-actions-wrap, button {
+  nav, .progress-bar, .live-preview-header, .letter-actions-wrap, 
+  button, .gen-left, #disc-bar {
     display: none !important;
   }
 }
@@ -1428,19 +1431,14 @@ function copyLetter() {
 
 /* ── DOWNLOAD PDF ───────────────────────────────────────────── */
 function downloadPDF() {
-  // More reliable way to find the letter preview
-  let letterContent = 
-    document.getElementById('letter-content') || 
-    document.getElementById('live-preview') || 
-    document.querySelector('.live-preview') || 
-    document.querySelector('#preview-content') ||
-    document.querySelector('.letter-preview');
+  // Target the exact element from your screenshot
+  let letterContent = document.getElementById('letter-doc');
 
-  // Also try to find the actual content area inside preview
+  // Fallbacks in case something changes
   if (!letterContent) {
-    letterContent = document.querySelector('.prose') || 
-                    document.querySelector('article') || 
-                    document.querySelector('.max-w-2xl');
+    letterContent = document.querySelector('.letter-doc') || 
+                    document.querySelector('#letter-preview-wrap') ||
+                    document.querySelector('.letter-preview-wrap');
   }
 
   if (!letterContent || letterContent.innerHTML.trim().length < 100) {

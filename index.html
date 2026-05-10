@@ -1458,22 +1458,54 @@ function downloadPDF() {
   document.title = originalTitle;
 }
 
-/* ── EMAIL LETTER ───────────────────────────────────────────── */
-function emailLetter() {
+/* ── EMAIL LETTER (Using Resend API) ─────────────────────────── */
+async function emailLetter() {
   if (!letterGenerated) { 
-    alert('Generate a letter first.'); 
+    alert('Please generate a letter first.'); 
     return; 
   }
 
   const letterContent = document.getElementById('letter-doc');
   if (!letterContent) return;
 
-  const text = letterContent.innerText || letterContent.textContent;
+  const letterText = letterContent.innerText || letterContent.textContent;
 
-  const subject = encodeURIComponent(`Formal Demand Letter - ${TYPE_LABELS[formData.type] || 'Legal Matter'}`);
-  const body = encodeURIComponent(text);
+  const payload = {
+    to: formData.recEmail || prompt("Enter recipient email address:"),
+    from: "SueLetter <noreply@sueletter.com>", 
+    subject: `Formal Demand Letter - ${TYPE_LABELS[formData.type] || 'Legal Matter'}`,
+    letterText: letterText,
+    senderName: formData.senderName,
+    recipientName: formData.recName
+  };
 
-  window.location.href = `mailto:${formData.recEmail || ''}?subject=${subject}&body=${body}`;
+  if (!payload.to) return;
+
+  const btn = document.querySelector('button[onclick="emailLetter()"]');
+  const originalText = btn ? btn.textContent : '✉ Email';
+
+  try {
+    if (btn) btn.textContent = 'Sending...';
+
+    const response = await fetch('/api/send-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      alert(`✅ Email successfully sent to ${payload.to}`);
+    } else {
+      alert('Failed to send email: ' + (result.error || 'Unknown error'));
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Error sending email. Please try again.');
+  } finally {
+    if (btn) btn.textContent = originalText;
+  }
 }
 
 /* ── INIT ──────────────────────────────────────────────────────── */

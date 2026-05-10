@@ -1,0 +1,11 @@
+{
+  "name": "sueletter",
+  "version": "1.0.0",
+  "description": "AI Demand Letter Generator",
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "dependencies": {
+    "resend": "^4.0.0"
+  }
+}

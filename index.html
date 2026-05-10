@@ -1428,16 +1428,17 @@ function copyLetter() {
 
 /* ── DOWNLOAD PDF ───────────────────────────────────────────── */
 function downloadPDF() {
-  const letterContent = document.getElementById('letter-content');
-  if (!letterContent) {
-    alert("No letter to download");
+  // Find the letter preview area - adjust selector if needed
+  let letterContent = document.querySelector('#live-preview, #letter-content, .letter-preview, .live-preview');
+
+  if (!letterContent || letterContent.innerHTML.trim().length < 50) {
+    alert("No letter generated yet. Please generate a letter first.");
     return;
   }
 
   const originalTitle = document.title;
-  document.title = "Demand_Letter_" + (formData.type || "Legal");
+  document.title = "Demand_Letter_" + (formData?.type || "Legal");
 
-  // Print to PDF (Best simple method - no extra libraries)
   window.print();
 
   document.title = originalTitle;

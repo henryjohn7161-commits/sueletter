@@ -1265,8 +1265,8 @@ function revealPostGenerationUI() {
 
 /* ── LETTER GENERATION ─────────────────────────────────────────── */
 async function generateLetter() {
-// Temporarily bypass login for local testing
-// if (!isLoggedIn) { openLogin(); return; }
+  // Temporarily bypass login for testing
+  // if (!isLoggedIn) { openLogin(); return; }
 
   if (!formData.type) {
     alert("Please select a letter type first.");
@@ -1317,26 +1317,30 @@ Write a professional 4-6 paragraph letter. Start directly with sender name/addre
 
     let letterText = '';
     if (data.choices && data.choices[0] && data.choices[0].message) {
-      letterText = data.choices[0].message.content;
-    } else if (data.error) {
-      throw new Error(data.error.message || 'API Error');
+      letterText = data.choices[0].message.content.trim();
     } else {
       letterText = buildSampleLetter();
     }
 
-    // Display the letter
-    document.getElementById('letter-doc').innerHTML = 
-      `<pre style="white-space:pre-wrap;font-family:'Courier New',monospace;font-size:0.76rem;line-height:1.75;color:#aab8d0">${escHtml(letterText)}</pre>`;
+    // IMPROVED: Clean professional display
+    document.getElementById('letter-doc').innerHTML = `
+      <div style="font-family: 'Times New Roman', Georgia, serif; font-size: 13.5pt; line-height: 1.85; color: #111827; padding: 55px 60px; background: white; text-align: justify;">
+        ${letterText.replace(/\n/g, '<br><br>')}
+      </div>
+    `;
 
     letterGenerated = true;
     revealPostGenerationUI();
 
   } catch (e) {
     console.error(e);
-    alert("Failed to generate letter. Showing sample instead.");
+    alert("Failed to connect to AI. Showing sample instead.");
     const sample = buildSampleLetter();
-    document.getElementById('letter-doc').innerHTML = 
-      `<pre style="white-space:pre-wrap;font-family:'Courier New',monospace;font-size:0.76rem;line-height:1.75;color:#aab8d0">${escHtml(sample)}</pre>`;
+    document.getElementById('letter-doc').innerHTML = `
+      <div style="font-family: 'Times New Roman', Georgia, serif; font-size: 13.5pt; line-height: 1.85; color: #111827; padding: 55px 60px; background: white; text-align: justify;">
+        ${sample.replace(/\n/g, '<br><br>')}
+      </div>
+    `;
     letterGenerated = true;
     revealPostGenerationUI();
   }
@@ -1454,15 +1458,22 @@ function downloadPDF() {
   document.title = originalTitle;
 }
 
+/* ── EMAIL LETTER ───────────────────────────────────────────── */
 function emailLetter() {
-  if (!letterGenerated) { alert('Generate a letter first.'); return; }
-  if (isEditing) editLetter();
-  const txt = getLetterText();
-  if (!txt) { alert('No letter content to email.'); return; }
-  const subject = encodeURIComponent('Formal Demand Letter — ' + (TYPE_LABELS[formData.type] || 'Demand'));
-  const body = encodeURIComponent(txt);
-  const to = encodeURIComponent(formData.recEmail || '');
-  window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+  if (!letterGenerated) { 
+    alert('Generate a letter first.'); 
+    return; 
+  }
+
+  const letterContent = document.getElementById('letter-doc');
+  if (!letterContent) return;
+
+  const text = letterContent.innerText || letterContent.textContent;
+
+  const subject = encodeURIComponent(`Formal Demand Letter - ${TYPE_LABELS[formData.type] || 'Legal Matter'}`);
+  const body = encodeURIComponent(text);
+
+  window.location.href = `mailto:${formData.recEmail || ''}?subject=${subject}&body=${body}`;
 }
 
 /* ── INIT ──────────────────────────────────────────────────────── */

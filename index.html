@@ -8,6 +8,29 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
+  /* Print Styles for Clean PDF */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #letter-content, #letter-content * {
+    visibility: visible;
+  }
+  #letter-content {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 40px;
+    font-family: 'Times New Roman', serif;
+    font-size: 12pt;
+    line-height: 1.8;
+    color: #000;
+  }
+  nav, .progress-bar, .live-preview-header, .letter-actions-wrap, button {
+    display: none !important;
+  }
+}
 /* ── RESET & ROOT ─────────────────────────────────────────────── */
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -1403,20 +1426,21 @@ function copyLetter() {
   });
 }
 
+/* ── DOWNLOAD PDF ───────────────────────────────────────────── */
 function downloadPDF() {
-  if (!letterGenerated) { alert('Generate a letter first.'); return; }
-  if (isEditing) editLetter();
-  const txt = getLetterText();
-  if (!txt) { alert('No letter content to download.'); return; }
-  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Demand Letter</title><style>body{font-family:'Times New Roman',serif;font-size:12pt;line-height:1.8;margin:2.5cm;color:#000}pre{white-space:pre-wrap;font-family:'Times New Roman',serif;font-size:12pt}</style></head><body><pre>${escHtml(txt)}</pre></body></html>`;
-  const blob = new Blob([html], { type: 'text/html' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'SueLetter-DemandLetter.html';
-  a.click();
-  URL.revokeObjectURL(url);
-  alert('Downloaded as HTML — open in browser and use File → Print → Save as PDF.');
+  const letterContent = document.getElementById('letter-content');
+  if (!letterContent) {
+    alert("No letter to download");
+    return;
+  }
+
+  const originalTitle = document.title;
+  document.title = "Demand_Letter_" + (formData.type || "Legal");
+
+  // Print to PDF (Best simple method - no extra libraries)
+  window.print();
+
+  document.title = originalTitle;
 }
 
 function emailLetter() {

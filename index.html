@@ -774,58 +774,51 @@ nav{
 </div>
 
 <script>
-/* ── AUTH0 SETUP ───────────────────────────────────────────────── */
+// ==================== AUTH0 CONFIGURATION ====================
 let auth0Client = null;
+let isLoggedIn = false;
 
 async function initAuth0() {
   try {
     auth0Client = await createAuth0Client({
-      domain: 'dev-ej7oma8mgej73zwb.eu.auth0.com',
-      client_id: 'bV9k1JybdoaIGE8MSCWerNw1dxzN2rHZ',
-      cacheLocation: 'localstorage',
-      useRefreshTokens: true
+      domain: "dev-ej7oma8mgej73zwb.eu.auth0.com",
+      clientId: "bV9k1JybdoaIGE8MSCWerNw1dxzN2rHZ",
+      authorizationParams: {
+        redirect_uri: window.location.origin + window.location.pathname
+      }
     });
 
-    const isAuthenticated = await auth0Client.isAuthenticated();
-    if (isAuthenticated) {
-      isLoggedIn = true;
-      const user = await auth0Client.getUser();
-      console.log("✅ Logged in as:", user.email);
+    if (window.location.search.includes("code=")) {
+      await auth0Client.handleRedirectCallback();
+      window.history.replaceState({}, document.title, window.location.pathname);
     }
+
+    isLoggedIn = await auth0Client.isAuthenticated();
+    console.log("✅ Auth0 Initialized | Logged in:", isLoggedIn);
+
   } catch (err) {
-    console.error("Auth0 init failed:", err);
+    console.error("❌ Auth0 Init Failed:", err);
+    alert("Auth0 failed to initialize. Please hard refresh (Ctrl + Shift + R)");
   }
 }
 
 async function openLogin() {
   if (!auth0Client) {
-    await initAuth0();
+    alert("Auth0 is still initializing. Please refresh the page.");
+    return;
   }
-  await auth0Client.loginWithRedirect({
-    redirect_uri: window.location.origin
-  });
+  await auth0Client.loginWithRedirect();
 }
 
-async function handleAuthCallback() {
-  if (!auth0Client) await initAuth0();
-  
-  const isAuthenticated = await auth0Client.isAuthenticated();
-  if (isAuthenticated) {
-    isLoggedIn = true;
-    const user = await auth0Client.getUser();
-    alert(`✅ Successfully logged in as ${user.email}`);
+async function logout() {
+  if (auth0Client) {
+    await auth0Client.logout({ logoutParams: { returnTo: window.location.origin } });
   }
 }
 
-// Initialize Auth0 when page loads
-window.addEventListener('load', async () => {
-  await initAuth0();
-  
-  // Handle callback from Auth0
-  if (window.location.search.includes("code=") || window.location.search.includes("state=")) {
-    await handleAuthCallback();
-  }
-});
+// Make functions global
+window.openLogin = openLogin;
+window.logout = logout;
   
 /* ── CONFIGURATION ─────────────────────────────────────────────── */
 
@@ -899,18 +892,38 @@ const LETTER_TYPE_DESCS = {
 /* ── STATE ─────────────────────────────────────────────────────── */
 let step = 1;
 const totalSteps = 9;
-let isLoggedIn = localStorage.getItem('sl_login') === '1';
 let isEditing = false;
 let letterGenerated = false;
 
 let formData = {
-  type:'', tone:'firm', country:'United States', jurisdiction:'', language:'English',
-  deadline:'14', resolution:'', prior:false, evidence:[], dispute:'',
-  amount:'5000', currency:'USD $', incidentDate:'',
-  senderName:'', senderAddr:'', senderCity:'', senderState:'', senderZip:'',
-  senderPhone:'', senderEmail:'',
-  recName:'', recAddr:'', recCity:'', recState:'', recZip:'',
-  recEmail:'', recRole:'', recCompany:''
+  type: '', 
+  tone: 'firm', 
+  country: 'United States', 
+  jurisdiction: '', 
+  language: 'English',
+  deadline: '14', 
+  resolution: '', 
+  prior: false, 
+  evidence: [], 
+  dispute: '',
+  amount: '5000', 
+  currency: 'USD $', 
+  incidentDate: '',
+  senderName: '', 
+  senderAddr: '', 
+  senderCity: '', 
+  senderState: '', 
+  senderZip: '',
+  senderPhone: '', 
+  senderEmail: '',
+  recName: '', 
+  recAddr: '', 
+  recCity: '', 
+  recState: '', 
+  recZip: '',
+  recEmail: '', 
+  recRole: '', 
+  recCompany: ''
 };
 
 /* ── UTILITIES ─────────────────────────────────────────────────── */
@@ -1556,6 +1569,10 @@ async function emailLetter() {
     alert("Error sending email. Please try again.");
   }
 }
+
+// Make Auth0 functions available globally
+window.openLogin = openLogin;
+window.logout = logout;
 
 showPage('home');
 </script>

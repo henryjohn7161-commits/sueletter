@@ -780,6 +780,9 @@ let auth0Client = null;
 async function initAuth0() {
   if (auth0Client) return auth0Client;
 
+  // Wait a bit for SDK to load
+  await new Promise(resolve => setTimeout(resolve, 300));
+
   try {
     auth0Client = await createAuth0Client({
       domain: 'dev-ej7oma8mgej73zwb.eu.auth0.com',
@@ -787,41 +790,44 @@ async function initAuth0() {
       cacheLocation: 'localstorage'
     });
   } catch (e) {
-    console.error("Auth0 init failed:", e);
+    console.error("Auth0 initialization failed:", e);
   }
   return auth0Client;
 }
 
 async function openLogin() {
   await initAuth0();
-  if (auth0Client) {
-    await auth0Client.loginWithRedirect({
-      redirect_uri: window.location.origin
-    });
-  } else {
-    alert("Auth0 is not initialized. Check console.");
+  if (!auth0Client) {
+    alert("Auth0 failed to load. Please refresh the page.");
+    return;
   }
+  await auth0Client.loginWithRedirect({
+    redirect_uri: window.location.origin
+  });
 }
 
 async function getCurrentUser() {
-  if (!auth0Client) await initAuth0();
+  await initAuth0();
   if (!auth0Client) return null;
-  const isAuth = await auth0Client.isAuthenticated();
-  if (isAuth) return await auth0Client.getUser();
+  const isAuthenticated = await auth0Client.isAuthenticated();
+  if (isAuthenticated) {
+    return await auth0Client.getUser();
+  }
   return null;
 }
 
 // Handle callback
 window.addEventListener('load', async () => {
   await initAuth0();
+
   if (window.location.search.includes('code=')) {
     try {
       await auth0Client.handleRedirectCallback();
       isLoggedIn = true;
       const user = await auth0Client.getUser();
-      alert(`✅ Welcome, ${user.name || user.email}!`);
+      alert(`✅ Welcome, ${user.name || user.email || 'User'}!`);
     } catch (e) {
-      console.error(e);
+      console.error("Callback error:", e);
     }
   }
 });

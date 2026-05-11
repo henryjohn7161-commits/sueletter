@@ -574,7 +574,7 @@ nav{
     <button class="nav-link" onclick="showPage('home')">Home</button>
     <button class="nav-link" onclick="showPage('generator');renderStep()">Generator</button>
     <button class="nav-link" onclick="showPage('dashboard')">Dashboard</button>
-    <button class="btn-login" onclick="openLogin()">Log in</button>
+    <button class="btn-login" id="nav-auth-btn" onclick="handleAuthClick()">Log in</button>
     <button class="btn-cta" onclick="showPage('generator');renderStep()">Get Started</button>
   </div>
 </nav>
@@ -715,8 +715,11 @@ nav{
   <div class="dash-wrap">
     <div class="dash-top">
       <div class="dash-welcome">
-        <h2>Welcome back, John Doe</h2>
+        <h2 id="dash-greeting">Welcome back, User</h2>
         <p>Manage your demand letters and account settings.</p>
+      </div>
+      <div>
+        <button class="btn-cta" id="dash-logout-btn" style="display:none" onclick="logout()">Log Out</button>
       </div>
     </div>
     <div class="dash-stats">
@@ -765,67 +768,148 @@ nav{
     </div>
     <div class="login-body">
       <p>Choose your preferred sign-in method</p>
-      <button class="sso-btn" onclick="slDoLogin('Google')">Sign in with Google</button>
-      <button class="sso-btn" onclick="slDoLogin('Microsoft')">Sign in with Microsoft</button>
-      <p class="login-terms">By signing in you agree to our <a href="#">Terms of Service</a></p>
+      <button class="sso-btn" onclick="handleLogin('google')">🔵 Sign in with Google</button>
+      <button class="sso-btn" onclick="handleLogin('microsoft')">🔷 Sign in with Microsoft</button>
+      <p class="login-terms">By signing in you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></p>
     </div>
   </div>
 </div>
 
 <script>
-// ==================== AUTH0 SETUP ====================
+/* ==================== AUTH0 SETUP ==================== */
 let auth0Client = null;
 let isLoggedIn = false;
+let currentUser = null;
 
+// CRITICAL FIX: Initialize Auth0 on page load with proper error handling
 async function initAuth0() {
   try {
-    if (typeof createAuth0Client === "undefined") {
-      console.log("Waiting for Auth0 SDK...");
-      await new Promise(r => setTimeout(r, 1200));
+    // Wait for Auth0 SDK to be available
+    let attempts = 0;
+    while (typeof Auth0Client === 'undefined' && attempts < 50) {
+      await new Promise(r => setTimeout(r, 100));
+      attempts++;
     }
 
-    auth0Client = await createAuth0Client({
-      domain: "dev-ej7oma8mgej73zwb.eu.auth0.com",
-      clientId: "bV9k1JybdoaIGE8MSCWerNw1dxzN2rHZ",
+    if (typeof Auth0Client === 'undefined') {
+      console.error('❌ Auth0 SDK failed to load after 5 seconds');
+      return;
+    }
+
+    // Create Auth0 client
+    auth0Client = new Auth0Client({
+      domain: 'dev-ej7oma8mgej73zwb.eu.auth0.com',
+      clientId: 'bV9k1JybdoaIGE8MSCWerNw1dxzN2rHZ',
       authorizationParams: {
-        redirect_uri: window.location.origin + window.location.pathname
+        redirect_uri: window.location.origin + window.location.pathname,
+        audience: 'https://sueletter-api',
+        scope: 'openid profile email'
       }
     });
 
-    if (window.location.search.includes("code=")) {
+    console.log('✅ Auth0 Client initialized');
+
+    // Handle redirect callback
+    const query = window.location.search;
+    if (query.includes('code=') && query.includes('state=')) {
+      console.log('Processing Auth0 callback...');
       await auth0Client.handleRedirectCallback();
       window.history.replaceState({}, document.title, window.location.pathname);
     }
 
+    // Check if user is logged in
     isLoggedIn = await auth0Client.isAuthenticated();
-    console.log("✅ Auth0 Initialized | Logged in:", isLoggedIn);
+    if (isLoggedIn) {
+      currentUser = await auth0Client.getUser();
+      console.log('✅ User logged in:', currentUser.email);
+      updateUIAfterLogin();
+    } else {
+      console.log('User not logged in');
+      updateUIBeforeLogin();
+    }
 
   } catch (err) {
-    console.error("❌ Auth0 Init Failed:", err);
+    console.error('❌ Auth0 initialization error:', err);
   }
 }
 
-async function openLogin() {
+function updateUIAfterLogin() {
+  const navBtn = document.getElementById('nav-auth-btn');
+  const logoutBtn = document.getElementById('dash-logout-btn');
+  const greeting = document.getElementById('dash-greeting');
+  
+  if (navBtn) navBtn.textContent = '✓ Logged In';
+  if (navBtn) navBtn.onclick = () => showPage('dashboard');
+  if (logoutBtn) logoutBtn.style.display = 'block';
+  if (greeting && currentUser) greeting.textContent = `Welcome back, ${currentUser.given_name || currentUser.name || 'User'}`;
+}
+
+function updateUIBeforeLogin() {
+  const navBtn = document.getElementById('nav-auth-btn');
+  const logoutBtn = document.getElementById('dash-logout-btn');
+  
+  if (navBtn) navBtn.textContent = 'Log in';
+  if (navBtn) navBtn.onclick = handleAuthClick;
+  if (logoutBtn) logoutBtn.style.display = 'none';
+}
+
+async function handleAuthClick() {
+  if (isLoggedIn) {
+    showPage('dashboard');
+  } else {
+    openLogin();
+  }
+}
+
+function openLogin() {
+  document.getElementById('login-overlay').classList.add('open');
+}
+
+function closeLogin() {
+  document.getElementById('login-overlay').classList.remove('open');
+}
+
+async function handleLogin(provider) {
+  if (!auth0Client) {
+    alert('Auth0 is still initializing. Please wait a moment and try again.');
+    return;
+  }
+
   try {
-    if (!auth0Client) await initAuth0();
-    if (auth0Client) {
-      await auth0Client.loginWithRedirect();
-    } else {
-      alert("Auth0 is still loading. Please wait a moment and try again.");
-    }
-  } catch (e) {
-    console.error(e);
-    alert("Login failed. Please refresh the page (Ctrl + Shift + R).");
+    await auth0Client.loginWithRedirect({
+      authorizationParams: {
+        connection: provider === 'google' ? 'google-oauth2' : 'windowslive',
+        redirect_uri: window.location.origin + window.location.pathname,
+        audience: 'https://sueletter-api',
+        scope: 'openid profile email'
+      }
+    });
+  } catch (err) {
+    console.error('Login error:', err);
+    alert('Login failed: ' + err.message);
   }
 }
 
 async function logout() {
   if (auth0Client) {
-    await auth0Client.logout({ logoutParams: { returnTo: window.location.origin } });
+    try {
+      await auth0Client.logout({
+        logoutParams: {
+          returnTo: window.location.origin + window.location.pathname
+        }
+      });
+      isLoggedIn = false;
+      currentUser = null;
+      updateUIBeforeLogin();
+      closeLogin();
+      showPage('home');
+    } catch (err) {
+      console.error('Logout error:', err);
+    }
   }
 }
-/* ── CONFIGURATION ─────────────────────────────────────────────── */
 
+/* ── CONFIGURATION ─────────────────────────────────────────────── */
 
 /* ── CONSTANTS ─────────────────────────────────────────────────── */
 const TYPE_LABELS = {
@@ -925,7 +1009,7 @@ function getLetterText() {
   if (pre) return pre.innerText;
   const ta = doc.querySelector('textarea');
   if (ta) return ta.value;
-  return null;
+  return doc.innerText;
 }
 
 /* ── PAGE ROUTING ──────────────────────────────────────────────── */
@@ -950,19 +1034,6 @@ function startGen(type) {
   showPage('generator');
   renderStep();
 }
-
-// Initialize on page load
-window.addEventListener('load', async () => {
-  await initAuth0();
-  
-  // Handle Auth0 callback
-  if (window.location.search.includes("code=")) {
-    if (auth0Client) {
-      await auth0Client.handleRedirectCallback();
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-  }
-});
 
 /* ── PROGRESS BAR ──────────────────────────────────────────────── */
 function buildProgBar() {
@@ -1304,9 +1375,6 @@ function revealPostGenerationUI() {
 
 /* ── LETTER GENERATION ─────────────────────────────────────────── */
 async function generateLetter() {
-  // Temporarily bypass login for testing
-  // if (!isLoggedIn) { openLogin(); return; }
-
   if (!formData.type) {
     alert("Please select a letter type first.");
     return;
@@ -1361,7 +1429,6 @@ Write a professional 4-6 paragraph letter. Start directly with sender name/addre
       letterText = buildSampleLetter();
     }
 
-    // IMPROVED: Clean professional display
     document.getElementById('letter-doc').innerHTML = `
       <div style="font-family: 'Times New Roman', Georgia, serif; font-size: 13.5pt; line-height: 1.85; color: #111827; padding: 55px 60px; background: white; text-align: justify;">
         ${letterText.replace(/\n/g, '<br><br>')}
@@ -1460,7 +1527,6 @@ function copyLetter() {
       btn.style.color = '';
     }, 2000);
   }).catch(() => {
-    // Fallback for browsers without clipboard API
     const ta = document.createElement('textarea');
     ta.value = txt;
     document.body.appendChild(ta);
@@ -1472,17 +1538,8 @@ function copyLetter() {
   });
 }
 
-/* ── DOWNLOAD PDF ───────────────────────────────────────────── */
 function downloadPDF() {
-  // Target the exact element from your screenshot
   let letterContent = document.getElementById('letter-doc');
-
-  // Fallbacks in case something changes
-  if (!letterContent) {
-    letterContent = document.querySelector('.letter-doc') || 
-                    document.querySelector('#letter-preview-wrap') ||
-                    document.querySelector('.letter-preview-wrap');
-  }
 
   if (!letterContent || letterContent.innerHTML.trim().length < 100) {
     alert("No letter generated yet. Please generate a letter first.");
@@ -1497,7 +1554,6 @@ function downloadPDF() {
   document.title = originalTitle;
 }
 
-/* ── PROFESSIONAL EMAIL SENDING ─────────────────────────────── */
 async function emailLetter() {
   if (!letterGenerated) {
     alert('Please generate a letter first.');
@@ -1525,11 +1581,9 @@ async function emailLetter() {
   const subject = `Formal Demand Letter - ${TYPE_LABELS[formData.type] || 'Legal Matter'}`;
 
   try {
-    // Get current logged in user email from Auth0
-    let userEmail = "noreply@sueletter.com"; // fallback
-    if (auth0Client) {
-      const user = await auth0Client.getUser();
-      if (user && user.email) userEmail = user.email;
+    let userEmail = "noreply@sueletter.com";
+    if (auth0Client && currentUser) {
+      userEmail = currentUser.email;
     }
 
     const response = await fetch('/api/send-email', {
@@ -1539,7 +1593,7 @@ async function emailLetter() {
         to: recipient,
         subject: subject,
         letterText: letterText,
-        userEmail: userEmail   // Real sender email
+        userEmail: userEmail
       })
     });
 
@@ -1556,13 +1610,15 @@ async function emailLetter() {
   }
 }
 
-window.openLogin = openLogin;
-window.logout = logout;
-
-window.addEventListener('load', initAuth0);
-
-showPage('home');
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', () => {
+  initAuth0();
+  showPage('home');
+});
 </script>
-</html>
+
+<!-- AUTH0 SDK - CRITICAL FIX -->
+<script src="https://cdn.auth0.com/js/auth0-spa-js/1.22/auth0-spa-js.production.js"></script>
+
 </body>
 </html>

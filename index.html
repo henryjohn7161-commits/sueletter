@@ -1458,8 +1458,8 @@ function downloadPDF() {
   document.title = originalTitle;
 }
 
-/* ── EMAIL LETTER (Using Resend API) ─────────────────────────── */
-async function emailLetter() {
+/* ── EMAIL LETTER (Open User's Email Client) ─────────────────── */
+function emailLetter() {
   if (!letterGenerated) { 
     alert('Please generate a letter first.'); 
     return; 
@@ -1468,44 +1468,18 @@ async function emailLetter() {
   const letterContent = document.getElementById('letter-doc');
   if (!letterContent) return;
 
-  const letterText = letterContent.innerText || letterContent.textContent;
+  let letterText = letterContent.innerText || letterContent.textContent;
 
-  const payload = {
-    to: formData.recEmail || prompt("Enter recipient email address:"),
-    from: "SueLetter <noreply@sueletter.com>", 
-    subject: `Formal Demand Letter - ${TYPE_LABELS[formData.type] || 'Legal Matter'}`,
-    letterText: letterText,
-    senderName: formData.senderName,
-    recipientName: formData.recName
-  };
+  // Clean up extra spaces/newlines for better email formatting
+  letterText = letterText.replace(/\n\s*\n/g, '\n\n').trim();
 
-  if (!payload.to) return;
+  const subject = encodeURIComponent(`Formal Demand Letter - ${TYPE_LABELS[formData.type] || 'Legal Matter'}`);
+  const body = encodeURIComponent(letterText);
 
-  const btn = document.querySelector('button[onclick="emailLetter()"]');
-  const originalText = btn ? btn.textContent : '✉ Email';
+  const recipientEmail = formData.recEmail ? encodeURIComponent(formData.recEmail) : '';
 
-  try {
-    if (btn) btn.textContent = 'Sending...';
-
-    const response = await fetch('/api/send-email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    const result = await response.json();
-
-    if (result.success) {
-      alert(`✅ Email successfully sent to ${payload.to}`);
-    } else {
-      alert('Failed to send email: ' + (result.error || 'Unknown error'));
-    }
-  } catch (err) {
-    console.error(err);
-    alert('Error sending email. Please try again.');
-  } finally {
-    if (btn) btn.textContent = originalText;
-  }
+  // Open user's default email client
+  window.location.href = `mailto:${recipientEmail}?subject=${subject}&body=${body}`;
 }
 
 /* ── INIT ──────────────────────────────────────────────────────── */

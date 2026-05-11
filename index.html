@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
 <style>
 /* Print Styles for Clean PDF */
 @media print {
@@ -780,9 +781,9 @@ let isLoggedIn = false;
 
 async function initAuth0() {
   try {
-    // Wait for SDK to load
-    if (typeof createAuth0Client === 'undefined') {
-      await new Promise(resolve => setTimeout(resolve, 800));
+    if (typeof createAuth0Client === "undefined") {
+      console.log("Waiting for Auth0 SDK...");
+      await new Promise(r => setTimeout(r, 1200));
     }
 
     auth0Client = await createAuth0Client({
@@ -793,26 +794,30 @@ async function initAuth0() {
       }
     });
 
-    if (window.location.search.includes("code=") || window.location.search.includes("state=")) {
+    if (window.location.search.includes("code=")) {
       await auth0Client.handleRedirectCallback();
       window.history.replaceState({}, document.title, window.location.pathname);
     }
 
     isLoggedIn = await auth0Client.isAuthenticated();
-    console.log("✅ Auth0 Initialized Successfully | Logged in:", isLoggedIn);
+    console.log("✅ Auth0 Initialized | Logged in:", isLoggedIn);
 
   } catch (err) {
-    console.error("Auth0 Init Error:", err);
-    // Don't show popup on every load
+    console.error("❌ Auth0 Init Failed:", err);
   }
 }
 
 async function openLogin() {
   try {
     if (!auth0Client) await initAuth0();
-    await auth0Client.loginWithRedirect();
+    if (auth0Client) {
+      await auth0Client.loginWithRedirect();
+    } else {
+      alert("Auth0 is still loading. Please wait a moment and try again.");
+    }
   } catch (e) {
-    alert("Login temporarily unavailable. Please refresh the page.");
+    console.error(e);
+    alert("Login failed. Please refresh the page (Ctrl + Shift + R).");
   }
 }
 
@@ -821,7 +826,6 @@ async function logout() {
     await auth0Client.logout({ logoutParams: { returnTo: window.location.origin } });
   }
 }
-
 /* ── CONFIGURATION ─────────────────────────────────────────────── */
 
 
@@ -1554,14 +1558,10 @@ async function emailLetter() {
   }
 }
 
-// Expose functions globally
 window.openLogin = openLogin;
 window.logout = logout;
 
-// Initialize Auth0 when page loads
-window.addEventListener('load', () => {
-  initAuth0();
-});
+window.addEventListener('load', initAuth0);
 
 showPage('home');
 </script>

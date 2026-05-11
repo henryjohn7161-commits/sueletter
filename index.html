@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
@@ -8,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
 <style>
 /* Print Styles for Clean PDF */
 @media print {
@@ -774,6 +774,53 @@ nav{
 </div>
 
 <script>
+/* ── AUTH0 SETUP ─────────────────────────────────────────────── */
+let auth0Client = null;
+
+async function initAuth0() {
+  if (auth0Client) return auth0Client;
+
+  auth0Client = await createAuth0Client({
+    domain: 'dev-ej7oma8mgej73zwb.eu.auth0.com',
+    client_id: 'bV9k1JybdoaIGE8MSCWerNw1dxzN2rHZ',
+    cacheLocation: 'localstorage',
+    useRefreshTokens: true
+  });
+  return auth0Client;
+}
+
+async function openLogin() {
+  await initAuth0();
+  await auth0Client.loginWithRedirect({
+    redirect_uri: window.location.origin
+  });
+}
+
+async function getCurrentUser() {
+  await initAuth0();
+  const isAuthenticated = await auth0Client.isAuthenticated();
+  if (isAuthenticated) {
+    return await auth0Client.getUser();
+  }
+  return null;
+}
+
+// Handle Auth0 callback after login
+window.addEventListener('load', async () => {
+  await initAuth0();
+
+  if (window.location.search.includes('code=')) {
+    try {
+      await auth0Client.handleRedirectCallback();
+      isLoggedIn = true;
+      const user = await auth0Client.getUser();
+      alert(`✅ Welcome, ${user.name || user.email || 'User'}! You are now logged in.`);
+    } catch (e) {
+      console.error("Auth callback error:", e);
+    }
+  }
+});
+  
 /* ── CONFIGURATION ─────────────────────────────────────────────── */
 
 
@@ -900,43 +947,6 @@ function startGen(type) {
   step = 1;
   showPage('generator');
   renderStep();
-}
-
-/* ── AUTH0 LOGIN ───────────────────────────────────────────────── */
-let auth0Client = null;
-
-async function initAuth0() {
-  auth0Client = await createAuth0Client({
-    domain: 'dev-ej7oma8mgej73zwb.eu.auth0.com',
-    client_id: 'bV9k1JybdoaIGE8MSCWerNw1dxzN2rHZ',
-    cacheLocation: 'localstorage'
-  });
-  
-  const isAuthenticated = await auth0Client.isAuthenticated();
-  if (isAuthenticated) {
-    isLoggedIn = true;
-    const user = await auth0Client.getUser();
-    console.log("✅ Logged in as:", user.email);
-  }
-}
-
-async function openLogin() {
-  if (!auth0Client) await initAuth0();
-  
-  await auth0Client.loginWithRedirect({
-    redirect_uri: window.location.origin
-  });
-}
-
-async function handleAuthCallback() {
-  if (!auth0Client) await initAuth0();
-  
-  const isAuthenticated = await auth0Client.isAuthenticated();
-  if (isAuthenticated) {
-    isLoggedIn = true;
-    const user = await auth0Client.getUser();
-    alert(`✅ Welcome, ${user.name || user.email}! You are now logged in.`);
-  }
 }
 
 // Initialize on page load
@@ -1482,35 +1492,64 @@ function downloadPDF() {
   document.title = originalTitle;
 }
 
-/* ── EMAIL LETTER (Open User's Email Client) ─────────────────── */
-function emailLetter() {
-  if (!letterGenerated) { 
-    alert('Please generate a letter first.'); 
-    return; 
+/* ── PROFESSIONAL EMAIL SENDING ─────────────────────────────── */
+async function emailLetter() {
+  if (!letterGenerated) {
+    alert('Please generate a letter first.');
+    return;
   }
 
-  const letterContent = document.getElementById('letter-doc');
-  if (!letterContent) return;
+  if (!isLoggedIn) {
+    alert('Please log in first to send emails professionally.');
+    openLogin();
+    return;
+  }
 
-  let letterText = letterContent.innerText || letterContent.textContent;
+  const recipient = prompt("Enter recipient's email address:", formData.recEmail || '');
+  if (!recipient || !recipient.includes('@')) {
+    alert("Please enter a valid recipient email.");
+    return;
+  }
 
-  // Clean up extra spaces/newlines for better email formatting
-  letterText = letterText.replace(/\n\s*\n/g, '\n\n').trim();
+  const letterText = getLetterText();
+  if (!letterText) {
+    alert("No letter content available.");
+    return;
+  }
 
-  const subject = encodeURIComponent(`Formal Demand Letter - ${TYPE_LABELS[formData.type] || 'Legal Matter'}`);
-  const body = encodeURIComponent(letterText);
+  const subject = `Formal Demand Letter - ${TYPE_LABELS[formData.type] || 'Legal Matter'}`;
 
-  const recipientEmail = formData.recEmail ? encodeURIComponent(formData.recEmail) : '';
+  try {
+    // Get current logged in user email from Auth0
+    let userEmail = "noreply@sueletter.com"; // fallback
+    if (auth0Client) {
+      const user = await auth0Client.getUser();
+      if (user && user.email) userEmail = user.email;
+    }
 
-  // Open user's default email client
-  window.location.href = `mailto:${recipientEmail}?subject=${subject}&body=${body}`;
+    const response = await fetch('/api/send-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: recipient,
+        subject: subject,
+        letterText: letterText,
+        userEmail: userEmail   // Real sender email
+      })
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      alert(`✅ Email sent successfully to ${recipient}\n\nFrom: ${userEmail}`);
+    } else {
+      alert("Failed to send email: " + (result.error || 'Unknown error'));
+    }
+  } catch (e) {
+    console.error(e);
+    alert("Error sending email. Please try again.");
+  }
 }
-
-/* ── INIT ──────────────────────────────────────────────────────── */
-(function initPreviewDate() {
-  const el = document.getElementById('ld-date');
-  if (el) el.textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-})();
 
 showPage('home');
 </script>

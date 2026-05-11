@@ -901,28 +901,51 @@ function startGen(type) {
   renderStep();
 }
 
-/* ── LOGIN ─────────────────────────────────────────────────────── */
-function openLogin() {
-  document.getElementById('login-overlay').classList.add('open');
-}
+/* ── AUTH0 LOGIN ───────────────────────────────────────────────── */
+let auth0Client = null;
 
-function doLogin(provider) {
-  isLoggedIn = true;
-  localStorage.setItem('sl_login', '1');
-  document.getElementById('login-overlay').classList.remove('open');
-  alert('Signed in with ' + provider + '! You now have unlimited letters.');
-}
-
-function slDoLogin(provider) {
-  if (provider === 'Google') {
-    window.location.href = '/api/auth/login?connection=google-oauth2';
-  } else if (provider === 'Microsoft') {
-    window.location.href = '/api/auth/login?connection=windowslive';
+async function initAuth0() {
+  auth0Client = await createAuth0Client({
+    domain: 'dev-ej7oma8mgej73zwb.eu.auth0.com',
+    client_id: 'bV9k1JybdoaIGE8MSCWerNw1dxzN2rHZ',
+    cacheLocation: 'localstorage'
+  });
+  
+  const isAuthenticated = await auth0Client.isAuthenticated();
+  if (isAuthenticated) {
+    isLoggedIn = true;
+    const user = await auth0Client.getUser();
+    console.log("✅ Logged in as:", user.email);
   }
 }
 
-document.getElementById('login-overlay').addEventListener('click', e => {
-  if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+async function openLogin() {
+  if (!auth0Client) await initAuth0();
+  
+  await auth0Client.loginWithRedirect({
+    redirect_uri: window.location.origin
+  });
+}
+
+async function handleAuthCallback() {
+  if (!auth0Client) await initAuth0();
+  
+  const isAuthenticated = await auth0Client.isAuthenticated();
+  if (isAuthenticated) {
+    isLoggedIn = true;
+    const user = await auth0Client.getUser();
+    alert(`✅ Welcome, ${user.name || user.email}! You are now logged in.`);
+  }
+}
+
+// Initialize on page load
+window.addEventListener('load', async () => {
+  await initAuth0();
+  
+  // Handle Auth0 callback
+  if (window.location.search.includes("code=")) {
+    await handleAuthCallback();
+  }
 });
 
 /* ── PROGRESS BAR ──────────────────────────────────────────────── */

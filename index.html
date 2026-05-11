@@ -7,7 +7,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
 <style>
 /* Print Styles for Clean PDF */
 @media print {
@@ -565,6 +564,7 @@ nav{
   .hero h1{font-size:2.2rem}
 }
 </style>
+<script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
 </head>
 <body>
 
@@ -774,78 +774,56 @@ nav{
 </div>
 
 <script>
-/* ── AUTH0 SETUP ─────────────────────────────────────────────── */
+/* ── AUTH0 SETUP ───────────────────────────────────────────────── */
 let auth0Client = null;
 
 async function initAuth0() {
-  if (auth0Client) return auth0Client;
-
-  // Wait until SDK is ready
-  for (let i = 0; i < 30; i++) {
-    if (typeof createAuth0Client === 'function') break;
-    await new Promise(r => setTimeout(r, 100));
-  }
-
-  if (typeof createAuth0Client !== 'function') {
-    console.error("❌ Auth0 SDK not loaded");
-    return null;
-  }
-
   try {
     auth0Client = await createAuth0Client({
       domain: 'dev-ej7oma8mgej73zwb.eu.auth0.com',
       client_id: 'bV9k1JybdoaIGE8MSCWerNw1dxzN2rHZ',
-      cacheLocation: 'localstorage'
+      cacheLocation: 'localstorage',
+      useRefreshTokens: true
     });
-    console.log("✅ Auth0 client initialized");
+
+    const isAuthenticated = await auth0Client.isAuthenticated();
+    if (isAuthenticated) {
+      isLoggedIn = true;
+      const user = await auth0Client.getUser();
+      console.log("✅ Logged in as:", user.email);
+    }
   } catch (err) {
-    console.error("Auth0 init error:", err);
+    console.error("Auth0 init failed:", err);
   }
-  return auth0Client;
 }
 
 async function openLogin() {
-  console.log("🔄 openLogin called");
-  const client = await initAuth0();
+  if (!auth0Client) {
+    await initAuth0();
+  }
+  await auth0Client.loginWithRedirect({
+    redirect_uri: window.location.origin
+  });
+}
+
+async function handleAuthCallback() {
+  if (!auth0Client) await initAuth0();
   
-  if (!client) {
-    alert("Auth0 failed to initialize. Please hard refresh (Ctrl + Shift + R) and try again.");
-    return;
-  }
-
-  try {
-    await client.loginWithRedirect({
-      redirect_uri: window.location.origin
-    });
-  } catch (e) {
-    console.error(e);
-    alert("Could not start login. Check console (F12) for details.");
+  const isAuthenticated = await auth0Client.isAuthenticated();
+  if (isAuthenticated) {
+    isLoggedIn = true;
+    const user = await auth0Client.getUser();
+    alert(`✅ Successfully logged in as ${user.email}`);
   }
 }
 
-async function getCurrentUser() {
-  const client = await initAuth0();
-  if (!client) return null;
-  if (await client.isAuthenticated()) {
-    return await client.getUser();
-  }
-  return null;
-}
-
-// Handle callback after redirect
+// Initialize Auth0 when page loads
 window.addEventListener('load', async () => {
-  if (window.location.search.includes('code=') || window.location.search.includes('state=')) {
-    const client = await initAuth0();
-    if (client) {
-      try {
-        await client.handleRedirectCallback();
-        isLoggedIn = true;
-        const user = await client.getUser();
-        if (user) alert(`✅ Logged in as ${user.email}`);
-      } catch (e) {
-        console.error("Callback failed:", e);
-      }
-    }
+  await initAuth0();
+  
+  // Handle callback from Auth0
+  if (window.location.search.includes("code=") || window.location.search.includes("state=")) {
+    await handleAuthCallback();
   }
 });
   

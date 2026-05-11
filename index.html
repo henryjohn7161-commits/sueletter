@@ -804,7 +804,7 @@ async function initAuth0() {
 
 async function openLogin() {
   if (!auth0Client) {
-    alert("Auth0 is still initializing. Please refresh the page.");
+    alert("Please refresh the page and try again.");
     return;
   }
   await auth0Client.loginWithRedirect();
@@ -816,10 +816,6 @@ async function logout() {
   }
 }
 
-// Make functions global
-window.openLogin = openLogin;
-window.logout = logout;
-  
 /* ── CONFIGURATION ─────────────────────────────────────────────── */
 
 
@@ -896,34 +892,13 @@ let isEditing = false;
 let letterGenerated = false;
 
 let formData = {
-  type: '', 
-  tone: 'firm', 
-  country: 'United States', 
-  jurisdiction: '', 
-  language: 'English',
-  deadline: '14', 
-  resolution: '', 
-  prior: false, 
-  evidence: [], 
-  dispute: '',
-  amount: '5000', 
-  currency: 'USD $', 
-  incidentDate: '',
-  senderName: '', 
-  senderAddr: '', 
-  senderCity: '', 
-  senderState: '', 
-  senderZip: '',
-  senderPhone: '', 
-  senderEmail: '',
-  recName: '', 
-  recAddr: '', 
-  recCity: '', 
-  recState: '', 
-  recZip: '',
-  recEmail: '', 
-  recRole: '', 
-  recCompany: ''
+  type: '', tone: 'firm', country: 'United States', jurisdiction: '', language: 'English',
+  deadline: '14', resolution: '', prior: false, evidence: [], dispute: '',
+  amount: '5000', currency: 'USD $', incidentDate: '',
+  senderName: '', senderAddr: '', senderCity: '', senderState: '', senderZip: '',
+  senderPhone: '', senderEmail: '',
+  recName: '', recAddr: '', recCity: '', recState: '', recZip: '',
+  recEmail: '', recRole: '', recCompany: ''
 };
 
 /* ── UTILITIES ─────────────────────────────────────────────────── */
@@ -974,7 +949,10 @@ window.addEventListener('load', async () => {
   
   // Handle Auth0 callback
   if (window.location.search.includes("code=")) {
-    await handleAuthCallback();
+    if (auth0Client) {
+      await auth0Client.handleRedirectCallback();
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   }
 });
 
@@ -1570,7 +1548,7 @@ async function emailLetter() {
   }
 }
 
-// Make Auth0 functions available globally
+// Make Auth0 functions available
 window.openLogin = openLogin;
 window.logout = logout;
 

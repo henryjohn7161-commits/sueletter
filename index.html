@@ -776,34 +776,18 @@ nav{
 <script>
 /* ── AUTH0 SETUP ─────────────────────────────────────────────── */
 let auth0Client = null;
-let auth0Ready = false;
-
-async function waitForSDK() {
-  if (typeof createAuth0Client === 'function') return true;
-  
-  return new Promise((resolve) => {
-    let attempts = 0;
-    const maxAttempts = 25; // ~2.5 seconds
-    
-    const check = setInterval(() => {
-      attempts++;
-      if (typeof createAuth0Client === 'function') {
-        clearInterval(check);
-        resolve(true);
-      } else if (attempts >= maxAttempts) {
-        clearInterval(check);
-        resolve(false);
-      }
-    }, 100);
-  });
-}
 
 async function initAuth0() {
   if (auth0Client) return auth0Client;
-  
-  const sdkLoaded = await waitForSDK();
-  if (!sdkLoaded) {
-    console.error("Auth0 SDK failed to load");
+
+  // Wait until SDK is ready
+  for (let i = 0; i < 30; i++) {
+    if (typeof createAuth0Client === 'function') break;
+    await new Promise(r => setTimeout(r, 100));
+  }
+
+  if (typeof createAuth0Client !== 'function') {
+    console.error("❌ Auth0 SDK not loaded");
     return null;
   }
 
@@ -811,30 +795,31 @@ async function initAuth0() {
     auth0Client = await createAuth0Client({
       domain: 'dev-ej7oma8mgej73zwb.eu.auth0.com',
       client_id: 'bV9k1JybdoaIGE8MSCWerNw1dxzN2rHZ',
-      cacheLocation: 'localstorage',
-      useRefreshTokens: true
+      cacheLocation: 'localstorage'
     });
-    auth0Ready = true;
+    console.log("✅ Auth0 client initialized");
   } catch (err) {
-    console.error("Auth0 initialization error:", err);
+    console.error("Auth0 init error:", err);
   }
   return auth0Client;
 }
 
 async function openLogin() {
+  console.log("🔄 openLogin called");
   const client = await initAuth0();
+  
   if (!client) {
-    alert("Auth0 is still loading. Please refresh the page and try again.");
+    alert("Auth0 failed to initialize. Please hard refresh (Ctrl + Shift + R) and try again.");
     return;
   }
-  
+
   try {
     await client.loginWithRedirect({
       redirect_uri: window.location.origin
     });
   } catch (e) {
     console.error(e);
-    alert("Login failed. Please try again.");
+    alert("Could not start login. Check console (F12) for details.");
   }
 }
 
@@ -847,20 +832,19 @@ async function getCurrentUser() {
   return null;
 }
 
-// Handle redirect callback after login
+// Handle callback after redirect
 window.addEventListener('load', async () => {
-  await initAuth0();
-  
   if (window.location.search.includes('code=') || window.location.search.includes('state=')) {
-    try {
-      await auth0Client.handleRedirectCallback();
-      isLoggedIn = true;
-      const user = await auth0Client.getUser();
-      if (user) {
-        alert(`✅ Logged in successfully as ${user.email}`);
+    const client = await initAuth0();
+    if (client) {
+      try {
+        await client.handleRedirectCallback();
+        isLoggedIn = true;
+        const user = await client.getUser();
+        if (user) alert(`✅ Logged in as ${user.email}`);
+      } catch (e) {
+        console.error("Callback failed:", e);
       }
-    } catch (e) {
-      console.error("Callback error:", e);
     }
   }
 });

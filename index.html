@@ -774,12 +774,17 @@ nav{
 </div>
 
 <script>
-// ==================== AUTH0 CONFIGURATION ====================
+// ==================== AUTH0 SETUP ====================
 let auth0Client = null;
 let isLoggedIn = false;
 
 async function initAuth0() {
   try {
+    // Wait for SDK to load
+    if (typeof createAuth0Client === 'undefined') {
+      await new Promise(resolve => setTimeout(resolve, 800));
+    }
+
     auth0Client = await createAuth0Client({
       domain: "dev-ej7oma8mgej73zwb.eu.auth0.com",
       clientId: "bV9k1JybdoaIGE8MSCWerNw1dxzN2rHZ",
@@ -788,25 +793,27 @@ async function initAuth0() {
       }
     });
 
-    if (window.location.search.includes("code=")) {
+    if (window.location.search.includes("code=") || window.location.search.includes("state=")) {
       await auth0Client.handleRedirectCallback();
       window.history.replaceState({}, document.title, window.location.pathname);
     }
 
     isLoggedIn = await auth0Client.isAuthenticated();
-    console.log("✅ Auth0 Initialized | Logged in:", isLoggedIn);
+    console.log("✅ Auth0 Initialized Successfully | Logged in:", isLoggedIn);
 
   } catch (err) {
-    console.error("❌ Auth0 Init Failed:", err);
-    // Don't show alert on every load
+    console.error("Auth0 Init Error:", err);
+    // Don't show popup on every load
   }
 }
 
 async function openLogin() {
-  if (!auth0Client) {
-    await initAuth0();
+  try {
+    if (!auth0Client) await initAuth0();
+    await auth0Client.loginWithRedirect();
+  } catch (e) {
+    alert("Login temporarily unavailable. Please refresh the page.");
   }
-  await auth0Client.loginWithRedirect();
 }
 
 async function logout() {
@@ -1547,9 +1554,14 @@ async function emailLetter() {
   }
 }
 
-// Make Auth0 functions available
+// Expose functions globally
 window.openLogin = openLogin;
 window.logout = logout;
+
+// Initialize Auth0 when page loads
+window.addEventListener('load', () => {
+  initAuth0();
+});
 
 showPage('home');
 </script>

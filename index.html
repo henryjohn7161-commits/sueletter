@@ -798,14 +798,13 @@ async function initAuth0() {
 
   } catch (err) {
     console.error("❌ Auth0 Init Failed:", err);
-    alert("Auth0 failed to initialize. Please hard refresh (Ctrl + Shift + R)");
+    // Don't show alert on every load
   }
 }
 
 async function openLogin() {
   if (!auth0Client) {
-    alert("Please refresh the page and try again.");
-    return;
+    await initAuth0();
   }
   await auth0Client.loginWithRedirect();
 }

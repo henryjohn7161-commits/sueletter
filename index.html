@@ -768,8 +768,8 @@ nav{
     </div>
     <div class="login-body">
       <p>Choose your preferred sign-in method</p>
-      <button class="sso-btn" onclick="handleLogin('google')">🔵 Sign in with Google</button>
-      <button class="sso-btn" onclick="handleLogin('microsoft')">🔷 Sign in with Microsoft</button>
+      <button class="sso-btn" onclick="handleLogin('google-oauth2')">🔵 Sign in with Google</button>
+      <button class="sso-btn" onclick="handleLogin('windowslive')">🔷 Sign in with Microsoft</button>
       <p class="login-terms">By signing in you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></p>
     </div>
   </div>
@@ -869,24 +869,29 @@ function closeLogin() {
   document.getElementById('login-overlay').classList.remove('open');
 }
 
-async function handleLogin(provider) {
+async function handleLogin(connection) {
+  // Wait for auth0Client to be ready
+  let waited = 0;
+  while (!auth0Client && waited < 5000) {
+    await new Promise(r => setTimeout(r, 100));
+    waited += 100;
+  }
+
   if (!auth0Client) {
-    alert('Auth0 is still initializing. Please wait a moment and try again.');
+    alert('Login service failed to load. Please refresh the page and try again.');
     return;
   }
 
   try {
     await auth0Client.loginWithRedirect({
       authorizationParams: {
-        connection: provider === 'google' ? 'google-oauth2' : 'windowslive',
-        redirect_uri: window.location.origin + window.location.pathname,
-        audience: 'https://sueletter-api',
-        scope: 'openid profile email'
+        redirect_uri: window.location.origin,
+        connection: connection
       }
     });
   } catch (err) {
     console.error('Login error:', err);
-    alert('Login failed: ' + err.message);
+    alert('Login failed. Please try again.');
   }
 }
 

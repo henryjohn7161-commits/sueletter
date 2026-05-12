@@ -269,8 +269,6 @@ nav{
   .hero h1{font-size:2.2rem}
 }
 </style>
-    <!-- Auth0 SDK -->
-    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
 </head>
 <body>
 
@@ -281,7 +279,7 @@ nav{
     <button class="nav-link" onclick="showPage('home')">Home</button>
     <button class="nav-link" onclick="showPage('generator');renderStep()">Generator</button>
     <button class="nav-link" onclick="showPage('dashboard')">Dashboard</button>
-    <button class="nav-link" id="nav-auth-btn" onclick="handleAuthClick()">Log in</button>
+    <button class="btn-login" id="nav-auth-btn" onclick="handleAuthClick()">Log in</button>
     <button class="btn-cta" onclick="showPage('generator');renderStep()">Get Started</button>
   </div>
 </nav>
@@ -452,8 +450,8 @@ nav{
     </div>
     <div class="login-body">
       <p>Choose your preferred sign-in method</p>
-    <button class="sso-btn" id="google-btn">Sign in with Google</button>
-    <button class="sso-btn" id="microsoft-btn">Sign in with Microsoft</button>
+      <button class="sso-btn" onclick="handleLogin('google-oauth2')">🔵 Sign in with Google</button>
+      <button class="sso-btn" onclick="handleLogin('windowslive')">🔷 Sign in with Microsoft</button>
       <p class="login-terms">By signing in you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></p>
     </div>
   </div>
@@ -518,37 +516,17 @@ function updateUIBeforeLogin() {
 }
 
 async function handleAuthClick() {
-    if (typeof auth0Client === 'undefined' || !auth0Client) {
-        alert("Auth0 is still loading. Please refresh the page.");
-        return;
-    }
-
-    if (await auth0Client.isAuthenticated()) {
-        showPage('dashboard');
-    } else {
-        openLogin();   // This opens your login popup/overlay
-    }
+  if (isLoggedIn) { showPage('dashboard'); } else { openLogin(); }
 }
 
+function openLogin() { document.getElementById('login-overlay').classList.add('open'); }
+function closeLogin() { document.getElementById('login-overlay').classList.remove('open'); }
+
 async function handleLogin(connection) {
-  // Show loading state on button
-  const buttons = document.querySelectorAll('.sso-btn');
-  buttons.forEach(b => b.disabled = true);
-
-  // Wait up to 10 seconds for auth0Client
-  let waited = 0;
-  while (!auth0Client && waited < 10000) {
-    await new Promise(r => setTimeout(r, 200));
-    waited += 200;
-  }
-
-  buttons.forEach(b => b.disabled = false);
-
   if (!auth0Client) {
-    alert('Login service failed to initialize. Please:\n1. Hard refresh the page (Ctrl+Shift+R)\n2. Clear browser cache\n3. Try again');
+    alert('Login service is still loading. Please wait a moment and try again.');
     return;
   }
-
   try {
     await auth0Client.loginWithRedirect({
       authorizationParams: {
@@ -1144,30 +1122,10 @@ async function emailLetter(){
 }
 
 // ✅ Initialize on page load
-    document.addEventListener('DOMContentLoaded', () => {
-    // initAuth0();   // Already handled in auth0-config.js
-    showPage('home');
+document.addEventListener('DOMContentLoaded', () => {
+  initAuth0();
+  showPage('home');
 });
 </script>
-    </script>
-
-    <!-- Auth0 Configuration -->
-    <script src="js/auth0-config.js"></script>
-
-    <!-- Connect Login Buttons -->
-    <script>
-        // ====================== CONNECT SSO BUTTONS ======================
-        
-        // Google Button
-        document.getElementById('google-btn')?.addEventListener('click', () => {
-            handleLogin('google-oauth2');
-        });
-
-        // Microsoft Button
-        document.getElementById('microsoft-btn')?.addEventListener('click', () => {
-            handleLogin('windowslive');
-        });
-    </script>
 </body>
 </html>
-

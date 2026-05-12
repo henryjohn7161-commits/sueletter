@@ -797,15 +797,15 @@ async function initAuth0() {
     }
 
     // Create Auth0 client
-    auth0Client = new Auth0Client({
-      domain: 'dev-ej7oma8mgej73zwb.eu.auth0.com',
-      clientId: 'bV9k1JybdoaIGE8MSCWerNw1dxzN2rHZ',
-      authorizationParams: {
-        redirect_uri: window.location.origin + window.location.pathname,
-        audience: 'https://sueletter-api',
-        scope: 'openid profile email'
-      }
-    });
+auth0Client = new Auth0Client({
+  domain: 'dev-ej7oma8mgej73zwb.eu.auth0.com',
+  clientId: 'bV9k1JybdoaIGE8MSCWerNw1dxzN2rHZ',
+  authorizationParams: {
+    redirect_uri: window.location.origin,  // ← only change this line
+    audience: 'https://sueletter-api',
+    scope: 'openid profile email'
+  }
+});
 
     console.log('✅ Auth0 Client initialized');
 

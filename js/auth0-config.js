@@ -1,3 +1,8 @@
+// ==================== AUTH0 CONFIG ====================
+
+let auth0Client = null;
+let currentUser = null;
+
 async function initAuth0() {
     try {
         auth0Client = await createAuth0Client({
@@ -27,3 +32,31 @@ async function initAuth0() {
         console.error("❌ Auth0 Initialization Failed:", error);
     }
 }
+
+async function handleLogin(connection) {
+    if (!auth0Client) {
+        alert("Auth0 is still initializing. Please refresh the page.");
+        return;
+    }
+
+    try {
+        await auth0Client.loginWithRedirect({
+            authorizationParams: {
+                connection: connection
+            }
+        });
+    } catch (error) {
+        console.error("Login Error:", error);
+    }
+}
+
+async function handleLogout() {
+    if (auth0Client) {
+        await auth0Client.logout({
+            logoutParams: { returnTo: window.location.origin }
+        });
+    }
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', initAuth0);

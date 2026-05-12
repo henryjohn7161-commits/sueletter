@@ -523,10 +523,24 @@ function openLogin() { document.getElementById('login-overlay').classList.add('o
 function closeLogin() { document.getElementById('login-overlay').classList.remove('open'); }
 
 async function handleLogin(connection) {
+  // Show loading state on button
+  const buttons = document.querySelectorAll('.sso-btn');
+  buttons.forEach(b => b.disabled = true);
+
+  // Wait up to 10 seconds for auth0Client
+  let waited = 0;
+  while (!auth0Client && waited < 10000) {
+    await new Promise(r => setTimeout(r, 200));
+    waited += 200;
+  }
+
+  buttons.forEach(b => b.disabled = false);
+
   if (!auth0Client) {
-    alert('Login service is still loading. Please wait a moment and try again.');
+    alert('Login service failed to initialize. Please:\n1. Hard refresh the page (Ctrl+Shift+R)\n2. Clear browser cache\n3. Try again');
     return;
   }
+
   try {
     await auth0Client.loginWithRedirect({
       authorizationParams: {

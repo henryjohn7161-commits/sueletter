@@ -7,66 +7,41 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+
+<!-- ✅ AUTH0 SDK MUST BE FIRST — before any script that uses it -->
+<script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
+
 <style>
 /* Print Styles for Clean PDF */
 @media print {
-  body * {
-    visibility: hidden;
-  }
-  #letter-doc, #letter-doc * {
-    visibility: visible;
-  }
+  body * { visibility: hidden; }
+  #letter-doc, #letter-doc * { visibility: visible; }
   #letter-doc {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    padding: 60px 50px;
-    font-family: 'Times New Roman', serif;
-    font-size: 13pt;
-    line-height: 1.8;
-    color: #000;
-    white-space: pre-wrap;
-    background: white;
+    position: absolute; left: 0; top: 0; width: 100%;
+    padding: 60px 50px; font-family: 'Times New Roman', serif;
+    font-size: 13pt; line-height: 1.8; color: #000;
+    white-space: pre-wrap; background: white;
   }
-  nav, .progress-bar, .live-preview-header, .letter-actions-wrap, 
-  button, .gen-left, #disc-bar {
-    display: none !important;
-  }
+  nav, .progress-bar, .live-preview-header, .letter-actions-wrap,
+  button, .gen-left, #disc-bar { display: none !important; }
 }
 /* ── RESET & ROOT ─────────────────────────────────────────────── */
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --navy:#0c1628;
-  --navy2:#112240;
-  --navy3:#1a3057;
-  --navy4:#243b6e;
-  --slate:#8892b0;
-  --slate2:#a8b2d8;
-  --light:#ccd6f6;
-  --white:#e6f1ff;
-  --gold:#c9a84c;
-  --gold2:#b8963e;
-  --gold-dim:rgba(201,168,76,0.10);
-  --gold-dim2:rgba(201,168,76,0.18);
-  --border:rgba(201,168,76,0.18);
-  --border2:rgba(201,168,76,0.28);
-  --border3:rgba(201,168,76,0.42);
-  --green:#64ffda;
-  --red:#ff6b6b;
-  --shadow:0 4px 24px rgba(0,0,0,0.35);
-  --shadow-lg:0 8px 48px rgba(0,0,0,0.5);
-  --radius:6px;
-  --radius-lg:10px;
+  --navy:#0c1628; --navy2:#112240; --navy3:#1a3057; --navy4:#243b6e;
+  --slate:#8892b0; --slate2:#a8b2d8; --light:#ccd6f6; --white:#e6f1ff;
+  --gold:#c9a84c; --gold2:#b8963e;
+  --gold-dim:rgba(201,168,76,0.10); --gold-dim2:rgba(201,168,76,0.18);
+  --border:rgba(201,168,76,0.18); --border2:rgba(201,168,76,0.28); --border3:rgba(201,168,76,0.42);
+  --green:#64ffda; --red:#ff6b6b;
+  --shadow:0 4px 24px rgba(0,0,0,0.35); --shadow-lg:0 8px 48px rgba(0,0,0,0.5);
+  --radius:6px; --radius-lg:10px;
   --font-display:'Cormorant Garamond',Georgia,serif;
   --font-body:'DM Sans','Segoe UI',sans-serif;
 }
 body{
-  font-family:var(--font-body);
-  background:var(--navy);
-  color:var(--light);
-  min-height:100vh;
-  font-size:14px;
+  font-family:var(--font-body); background:var(--navy); color:var(--light);
+  min-height:100vh; font-size:14px;
   background-image:
     radial-gradient(ellipse 80% 50% at 50% -20%, rgba(201,168,76,0.06) 0%, transparent 60%),
     url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c9a84c' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
@@ -74,277 +49,102 @@ body{
 button{cursor:pointer;font-family:inherit}
 input,select,textarea{font-family:inherit}
 a{color:var(--gold);text-decoration:none}
-
-/* ── NAVIGATION ───────────────────────────────────────────────── */
 nav{
-  height:58px;
-  background:rgba(12,22,40,0.92);
-  border-bottom:1px solid var(--border);
-  backdrop-filter:blur(12px);
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 2rem;
-  position:sticky;top:0;z-index:100;
+  height:58px; background:rgba(12,22,40,0.92); border-bottom:1px solid var(--border);
+  backdrop-filter:blur(12px); display:flex; align-items:center; justify-content:space-between;
+  padding:0 2rem; position:sticky; top:0; z-index:100;
 }
-.logo{
-  font-family:var(--font-display);
-  font-size:1.4rem;font-weight:700;
-  color:var(--white);letter-spacing:0.5px;
-}
+.logo{font-family:var(--font-display);font-size:1.4rem;font-weight:700;color:var(--white);letter-spacing:0.5px}
 .logo span{color:var(--gold)}
 .nav-r{display:flex;align-items:center;gap:0.4rem}
-.nav-link{
-  background:none;border:none;
-  color:var(--slate2);font-size:0.82rem;font-weight:500;
-  padding:0.35rem 0.85rem;border-radius:var(--radius);
-  letter-spacing:0.3px;transition:color 0.15s;
-}
+.nav-link{background:none;border:none;color:var(--slate2);font-size:0.82rem;font-weight:500;padding:0.35rem 0.85rem;border-radius:var(--radius);letter-spacing:0.3px;transition:color 0.15s}
 .nav-link:hover{color:var(--white)}
-.btn-login{
-  background:transparent;
-  border:1px solid var(--border2);
-  color:var(--light);font-size:0.82rem;font-weight:500;
-  padding:0.35rem 1rem;border-radius:var(--radius);
-  transition:border-color 0.15s,color 0.15s;
-}
+.btn-login{background:transparent;border:1px solid var(--border2);color:var(--light);font-size:0.82rem;font-weight:500;padding:0.35rem 1rem;border-radius:var(--radius);transition:border-color 0.15s,color 0.15s}
 .btn-login:hover{border-color:var(--gold);color:var(--gold)}
-.btn-cta{
-  background:var(--gold);border:none;
-  color:var(--navy);font-size:0.82rem;font-weight:600;
-  padding:0.35rem 1.1rem;border-radius:var(--radius);
-  letter-spacing:0.4px;transition:background 0.15s;
-}
+.btn-cta{background:var(--gold);border:none;color:var(--navy);font-size:0.82rem;font-weight:600;padding:0.35rem 1.1rem;border-radius:var(--radius);letter-spacing:0.4px;transition:background 0.15s}
 .btn-cta:hover{background:var(--gold2)}
-
-/* ── PAGE SYSTEM ──────────────────────────────────────────────── */
 .page{display:none}
 .page.active{display:block}
-
-/* ── HERO ─────────────────────────────────────────────────────── */
-.hero{
-  background:linear-gradient(180deg, rgba(17,34,64,0.95) 0%, rgba(12,22,40,1) 100%);
-  border-bottom:1px solid var(--border);
-  padding:5rem 2rem 4rem;
-  text-align:center;
-  position:relative;overflow:hidden;
-}
-.hero::before{
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse 60% 40% at 50% 0%, rgba(201,168,76,0.08) 0%, transparent 70%);
-  pointer-events:none;
-}
-.hero-badge{
-  display:inline-flex;align-items:center;gap:0.4rem;
-  background:var(--gold-dim);
-  border:1px solid var(--border2);
-  color:var(--gold);font-size:0.7rem;font-weight:600;
-  padding:0.25rem 0.9rem;border-radius:20px;
-  margin-bottom:1.5rem;letter-spacing:1px;text-transform:uppercase;
-}
-.hero h1{
-  font-family:var(--font-display);
-  font-size:3.2rem;font-weight:700;line-height:1.1;
-  margin-bottom:1.25rem;color:var(--white);
-}
+.hero{background:linear-gradient(180deg,rgba(17,34,64,0.95) 0%,rgba(12,22,40,1) 100%);border-bottom:1px solid var(--border);padding:5rem 2rem 4rem;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 40% at 50% 0%,rgba(201,168,76,0.08) 0%,transparent 70%);pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:0.4rem;background:var(--gold-dim);border:1px solid var(--border2);color:var(--gold);font-size:0.7rem;font-weight:600;padding:0.25rem 0.9rem;border-radius:20px;margin-bottom:1.5rem;letter-spacing:1px;text-transform:uppercase}
+.hero h1{font-family:var(--font-display);font-size:3.2rem;font-weight:700;line-height:1.1;margin-bottom:1.25rem;color:var(--white)}
 .hero h1 em{color:var(--gold);font-style:italic}
-.hero-sub{
-  color:var(--slate2);font-size:1rem;
-  max-width:540px;margin:0 auto 2rem;line-height:1.7;font-weight:300;
-}
+.hero-sub{color:var(--slate2);font-size:1rem;max-width:540px;margin:0 auto 2rem;line-height:1.7;font-weight:300}
 .hero-btns{display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap}
-.btn-hero-p{
-  background:var(--gold);color:var(--navy);
-  font-weight:600;font-size:0.95rem;
-  padding:0.8rem 2rem;border:none;border-radius:var(--radius);
-  letter-spacing:0.3px;transition:background 0.15s,transform 0.1s;
-}
+.btn-hero-p{background:var(--gold);color:var(--navy);font-weight:600;font-size:0.95rem;padding:0.8rem 2rem;border:none;border-radius:var(--radius);letter-spacing:0.3px;transition:background 0.15s,transform 0.1s}
 .btn-hero-p:hover{background:var(--gold2);transform:translateY(-1px)}
-.btn-hero-s{
-  background:transparent;color:var(--light);
-  font-weight:500;font-size:0.95rem;
-  padding:0.8rem 2rem;
-  border:1px solid var(--border2);border-radius:var(--radius);
-  transition:border-color 0.15s;
-}
+.btn-hero-s{background:transparent;color:var(--light);font-weight:500;font-size:0.95rem;padding:0.8rem 2rem;border:1px solid var(--border2);border-radius:var(--radius);transition:border-color 0.15s}
 .btn-hero-s:hover{border-color:var(--gold)}
-
-/* ── STATS STRIP ──────────────────────────────────────────────── */
-.stats-strip{
-  background:rgba(17,34,64,0.8);
-  border-bottom:1px solid var(--border);
-  padding:1.75rem 2rem;
-  display:flex;justify-content:center;gap:5rem;
-}
+.stats-strip{background:rgba(17,34,64,0.8);border-bottom:1px solid var(--border);padding:1.75rem 2rem;display:flex;justify-content:center;gap:5rem}
 .stat-item{text-align:center}
-.stat-item h3{
-  font-family:var(--font-display);
-  font-size:2rem;font-weight:700;color:var(--gold);
-}
+.stat-item h3{font-family:var(--font-display);font-size:2rem;font-weight:700;color:var(--gold)}
 .stat-item p{font-size:0.78rem;color:var(--slate2);margin-top:0.15rem;letter-spacing:0.3px}
-
-/* ── SECTIONS ─────────────────────────────────────────────────── */
 .section{max-width:1060px;margin:0 auto;padding:4rem 2rem}
-.sec-label{
-  font-size:0.68rem;font-weight:600;letter-spacing:2px;
-  color:var(--gold);text-transform:uppercase;text-align:center;margin-bottom:0.5rem;
-}
-.sec-title{
-  font-family:var(--font-display);
-  font-size:1.9rem;font-weight:700;color:var(--white);
-  text-align:center;margin-bottom:0.5rem;
-}
+.sec-label{font-size:0.68rem;font-weight:600;letter-spacing:2px;color:var(--gold);text-transform:uppercase;text-align:center;margin-bottom:0.5rem}
+.sec-title{font-family:var(--font-display);font-size:1.9rem;font-weight:700;color:var(--white);text-align:center;margin-bottom:0.5rem}
 .sec-sub{color:var(--slate);text-align:center;font-size:0.87rem;margin-bottom:2.5rem;line-height:1.6}
-
-/* ── LETTER TYPE CARDS ────────────────────────────────────────── */
 .ltypes{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
-.ltype-card{
-  background:var(--navy2);
-  padding:1.25rem 1.4rem;cursor:pointer;
-  transition:background 0.15s;
-}
+.ltype-card{background:var(--navy2);padding:1.25rem 1.4rem;cursor:pointer;transition:background 0.15s}
 .ltype-card:hover{background:var(--navy3)}
 .ltype-icon{font-size:1.3rem;margin-bottom:0.6rem;display:block}
 .ltype-card h3{font-size:0.86rem;font-weight:600;color:var(--white);margin-bottom:0.25rem}
 .ltype-card p{font-size:0.77rem;color:var(--slate);line-height:1.5}
-
-/* ── HOW IT WORKS ─────────────────────────────────────────────── */
-.steps-grid{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;
-  text-align:center;
-  background:var(--navy2);
-  border:1px solid var(--border);
-  border-radius:var(--radius-lg);padding:2.5rem;
-}
-.step-n{
-  width:38px;height:38px;border-radius:50%;
-  background:var(--gold-dim);border:1px solid var(--border2);
-  color:var(--gold);font-weight:700;font-size:1rem;
-  display:flex;align-items:center;justify-content:center;
-  margin:0 auto 0.85rem;
-  font-family:var(--font-display);
-}
+.steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;text-align:center;background:var(--navy2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2.5rem}
+.step-n{width:38px;height:38px;border-radius:50%;background:var(--gold-dim);border:1px solid var(--border2);color:var(--gold);font-weight:700;font-size:1rem;display:flex;align-items:center;justify-content:center;margin:0 auto 0.85rem;font-family:var(--font-display)}
 .step h4{font-size:0.88rem;font-weight:600;color:var(--white);margin-bottom:0.35rem}
 .step p{font-size:0.8rem;color:var(--slate);line-height:1.6}
-
-/* ── HOME CTA BANNER ──────────────────────────────────────────── */
-.home-cta{
-  background:var(--navy2);border-top:1px solid var(--border);
-  padding:3.5rem 2rem;text-align:center;
-}
-.home-cta h2{
-  font-family:var(--font-display);
-  font-size:2rem;font-weight:700;color:var(--white);margin-bottom:0.6rem;
-}
+.home-cta{background:var(--navy2);border-top:1px solid var(--border);padding:3.5rem 2rem;text-align:center}
+.home-cta h2{font-family:var(--font-display);font-size:2rem;font-weight:700;color:var(--white);margin-bottom:0.6rem}
 .home-cta p{color:var(--slate2);margin-bottom:1.75rem;font-size:0.9rem}
-
-/* ── FOOTER ───────────────────────────────────────────────────── */
-.footer{
-  background:var(--navy2);border-top:1px solid var(--border);
-  padding:1.25rem 2rem;text-align:center;
-  font-size:0.76rem;color:var(--slate);
-}
+.footer{background:var(--navy2);border-top:1px solid var(--border);padding:1.25rem 2rem;text-align:center;font-size:0.76rem;color:var(--slate)}
 .footer strong{color:var(--slate2)}
-
-/* ── GENERATOR PAGE ───────────────────────────────────────────── */
 #page-generator{display:none}
 #page-generator.active{display:flex;flex-direction:column;height:calc(100vh - 58px)}
 .gen-shell{display:flex;flex:1;overflow:hidden}
 .gen-left{width:55%;border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
 .gen-right{width:45%;background:var(--navy2);overflow-y:auto;display:flex;flex-direction:column}
-
-/* PROGRESS BAR */
-.prog-bar{
-  background:rgba(12,22,40,0.95);border-bottom:1px solid var(--border);
-  padding:0.85rem 1.5rem;
-}
+.prog-bar{background:rgba(12,22,40,0.95);border-bottom:1px solid var(--border);padding:0.85rem 1.5rem}
 .prog-header{display:flex;align-items:center;gap:0.6rem;margin-bottom:0.85rem}
-.doc-icon{
-  width:30px;height:30px;background:var(--gold-dim);
-  border:1px solid var(--border2);border-radius:5px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:0.9rem;
-}
+.doc-icon{width:30px;height:30px;background:var(--gold-dim);border:1px solid var(--border2);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:0.9rem}
 .prog-header span{font-size:0.7rem;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:1px}
 .prog-steps{display:flex;align-items:center}
 .prog-step{display:flex;flex-direction:column;align-items:center;position:relative}
-.prog-step-num{
-  width:26px;height:26px;border-radius:50%;
-  background:var(--navy3);border:1px solid var(--border);
-  color:var(--slate);font-size:0.7rem;font-weight:600;
-  display:flex;align-items:center;justify-content:center;
-  transition:all 0.2s;font-family:var(--font-display);
-}
+.prog-step-num{width:26px;height:26px;border-radius:50%;background:var(--navy3);border:1px solid var(--border);color:var(--slate);font-size:0.7rem;font-weight:600;display:flex;align-items:center;justify-content:center;transition:all 0.2s;font-family:var(--font-display)}
 .prog-step.done .prog-step-num{background:var(--gold);border-color:var(--gold);color:var(--navy)}
 .prog-step.active .prog-step-num{background:var(--gold-dim);border-color:var(--gold);color:var(--gold)}
 .prog-step-label{font-size:0.58rem;color:var(--slate);margin-top:0.2rem;white-space:nowrap;max-width:42px;overflow:hidden;text-overflow:ellipsis}
 .prog-step.done .prog-step-label,.prog-step.active .prog-step-label{color:var(--gold)}
 .prog-line{flex:1;height:1px;background:var(--border);min-width:6px;margin-bottom:14px}
 .prog-line.done{background:var(--gold)}
-
-/* STEP CONTENT */
 .step-content{flex:1;padding:1.75rem;overflow-y:auto}
-.step-title{
-  font-family:var(--font-display);
-  font-size:1.3rem;font-weight:700;color:var(--white);margin-bottom:0.3rem;
-}
+.step-title{font-family:var(--font-display);font-size:1.3rem;font-weight:700;color:var(--white);margin-bottom:0.3rem}
 .step-desc{color:var(--slate2);font-size:0.83rem;margin-bottom:1.5rem;line-height:1.55}
-
-/* LETTER TYPE GRID */
 .ltype-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.5rem}
-.ltype-btn{
-  background:var(--navy2);border:1px solid var(--border);
-  border-radius:var(--radius);padding:0.9rem;
-  text-align:left;cursor:pointer;transition:border-color 0.15s,background 0.15s;
-}
+.ltype-btn{background:var(--navy2);border:1px solid var(--border);border-radius:var(--radius);padding:0.9rem;text-align:left;cursor:pointer;transition:border-color 0.15s,background 0.15s}
 .ltype-btn:hover{border-color:var(--border2)}
 .ltype-btn.sel{border-color:var(--gold);background:var(--gold-dim)}
 .ltype-btn .ti{font-size:1.1rem;margin-bottom:0.35rem;display:block}
 .ltype-btn .tn{font-size:0.78rem;font-weight:600;color:var(--white);display:block;margin-bottom:0.15rem}
 .ltype-btn .td{font-size:0.7rem;color:var(--slate);line-height:1.35}
-
-/* FORM FIELDS */
 .field-group{display:grid;gap:0.9rem;grid-template-columns:1fr 1fr}
 .field-group.full{grid-template-columns:1fr}
 .field-group.triple{grid-template-columns:1fr 1fr 1fr}
 .field{display:flex;flex-direction:column;gap:0.3rem}
 .field label{font-size:0.76rem;font-weight:500;color:var(--slate2);letter-spacing:0.2px}
 .field label .req{color:var(--gold)}
-.field input,.field select,.field textarea{
-  background:var(--navy3);
-  border:1px solid var(--border);
-  border-radius:var(--radius);padding:0.55rem 0.75rem;
-  font-size:0.84rem;color:var(--light);
-  transition:border-color 0.15s;outline:none;
-}
+.field input,.field select,.field textarea{background:var(--navy3);border:1px solid var(--border);border-radius:var(--radius);padding:0.55rem 0.75rem;font-size:0.84rem;color:var(--light);transition:border-color 0.15s;outline:none}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold)}
 .field select option{background:var(--navy2)}
 .field textarea{resize:vertical;min-height:90px}
 .field input::placeholder,.field textarea::placeholder{color:var(--slate)}
-
-/* ELABORATE BTN */
-.btn-elaborate{
-  background:var(--gold-dim);border:1px solid var(--border2);
-  color:var(--gold);font-size:0.79rem;font-weight:600;
-  padding:0.45rem 1rem;border-radius:var(--radius);
-  display:inline-flex;align-items:center;gap:0.4rem;margin-top:0.5rem;
-  transition:background 0.15s;
-}
+.btn-elaborate{background:var(--gold-dim);border:1px solid var(--border2);color:var(--gold);font-size:0.79rem;font-weight:600;padding:0.45rem 1rem;border-radius:var(--radius);display:inline-flex;align-items:center;gap:0.4rem;margin-top:0.5rem;transition:background 0.15s}
 .btn-elaborate:hover{background:var(--gold-dim2)}
-
-/* TONE CARDS */
 .tone-cards{display:flex;flex-direction:column;gap:0.65rem}
-.tone-card{
-  background:var(--navy2);border:1px solid var(--border);
-  border-radius:var(--radius);padding:1rem 1.1rem;cursor:pointer;
-  display:flex;align-items:flex-start;gap:0.75rem;
-  transition:border-color 0.15s;
-}
+.tone-card{background:var(--navy2);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.1rem;cursor:pointer;display:flex;align-items:flex-start;gap:0.75rem;transition:border-color 0.15s}
 .tone-card:hover{border-color:var(--border2)}
 .tone-card.sel{border-color:var(--gold);background:var(--gold-dim)}
-.tone-radio{
-  width:16px;height:16px;border-radius:50%;
-  border:2px solid var(--border2);flex-shrink:0;margin-top:2px;
-  transition:all 0.15s;
-}
+.tone-radio{width:16px;height:16px;border-radius:50%;border:2px solid var(--border2);flex-shrink:0;margin-top:2px;transition:all 0.15s}
 .tone-card.sel .tone-radio{border-color:var(--gold);background:var(--gold);box-shadow:inset 0 0 0 3px var(--navy2)}
 .tone-name{font-size:0.84rem;font-weight:600;color:var(--white);margin-bottom:0.2rem;display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap}
 .tone-badge{font-size:0.63rem;font-weight:600;padding:0.15rem 0.5rem;border-radius:10px;border:1px solid}
@@ -352,29 +152,16 @@ nav{
 .tone-badge.last{background:rgba(255,107,107,0.1);border-color:rgba(255,107,107,0.3);color:var(--red)}
 .tone-desc{font-size:0.77rem;color:var(--slate2);margin-bottom:0.4rem}
 .tone-quote{font-size:0.74rem;color:var(--slate);font-style:italic;line-height:1.55}
-
-/* EVIDENCE */
-.upload-zone{
-  background:var(--navy3);border:1.5px dashed var(--border);
-  border-radius:var(--radius);padding:1.5rem;text-align:center;cursor:pointer;
-  transition:border-color 0.15s;
-}
+.upload-zone{background:var(--navy3);border:1.5px dashed var(--border);border-radius:var(--radius);padding:1.5rem;text-align:center;cursor:pointer;transition:border-color 0.15s}
 .upload-zone:hover{border-color:var(--border2)}
 .upload-zone input{display:none}
 .up-icon{font-size:1.5rem;margin-bottom:0.4rem}
 .ev-types{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:1rem}
-.ev-type{
-  background:var(--navy3);border:1px solid var(--border);
-  border-radius:var(--radius);padding:0.55rem 0.75rem;cursor:pointer;
-  font-size:0.77rem;color:var(--slate2);
-  display:flex;align-items:center;gap:0.4rem;transition:all 0.15s;
-}
+.ev-type{background:var(--navy3);border:1px solid var(--border);border-radius:var(--radius);padding:0.55rem 0.75rem;cursor:pointer;font-size:0.77rem;color:var(--slate2);display:flex;align-items:center;gap:0.4rem;transition:all 0.15s}
 .ev-type:hover{border-color:var(--border2);color:var(--light)}
 .ev-type.sel{border-color:var(--gold);color:var(--gold);background:var(--gold-dim)}
 .ev-check{width:14px;height:14px;border:1.5px solid currentColor;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0}
 .ev-type.sel .ev-check::before{content:'✓'}
-
-/* PRIOR CONTACT */
 .prior-card{background:var(--navy2);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem 1.2rem;margin-bottom:0.65rem}
 .prior-toggle-row{display:flex;justify-content:space-between;align-items:center;cursor:pointer;gap:1rem}
 .prior-toggle-row h4{font-size:0.87rem;font-weight:600;color:var(--white)}
@@ -384,70 +171,31 @@ nav{
 .toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left 0.2s}
 .toggle.on::after{left:18px}
 .prior-note{background:var(--navy3);border:1px solid var(--border);border-radius:var(--radius);padding:0.85rem;font-size:0.79rem;color:var(--slate2);line-height:1.55}
-
-/* BOTTOM NAV */
-.gen-bottom{
-  background:rgba(12,22,40,0.95);border-top:1px solid var(--border);
-  padding:0.85rem 1.75rem;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;
-}
-.btn-back{
-  background:none;border:1px solid var(--border);color:var(--slate2);
-  font-size:0.84rem;padding:0.55rem 1.1rem;border-radius:var(--radius);
-  display:flex;align-items:center;gap:0.4rem;transition:border-color 0.15s,color 0.15s;
-}
+.gen-bottom{background:rgba(12,22,40,0.95);border-top:1px solid var(--border);padding:0.85rem 1.75rem;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.btn-back{background:none;border:1px solid var(--border);color:var(--slate2);font-size:0.84rem;padding:0.55rem 1.1rem;border-radius:var(--radius);display:flex;align-items:center;gap:0.4rem;transition:border-color 0.15s,color 0.15s}
 .btn-back:hover{border-color:var(--border2);color:var(--light)}
-.btn-next{
-  background:var(--gold);color:var(--navy);font-weight:600;
-  font-size:0.86rem;padding:0.55rem 1.5rem;border:none;border-radius:var(--radius);
-  display:flex;align-items:center;gap:0.4rem;transition:background 0.15s;
-}
+.btn-next{background:var(--gold);color:var(--navy);font-weight:600;font-size:0.86rem;padding:0.55rem 1.5rem;border:none;border-radius:var(--radius);display:flex;align-items:center;gap:0.4rem;transition:background 0.15s}
 .btn-next:hover{background:var(--gold2)}
-.btn-generate{
-  background:var(--gold);color:var(--navy);font-weight:600;
-  font-size:0.86rem;padding:0.55rem 1.7rem;border:none;border-radius:var(--radius);
-  transition:background 0.15s;
-}
+.btn-generate{background:var(--gold);color:var(--navy);font-weight:600;font-size:0.86rem;padding:0.55rem 1.7rem;border:none;border-radius:var(--radius);transition:background 0.15s}
 .btn-generate:hover{background:var(--gold2)}
 .free-label{font-size:0.74rem;color:var(--slate)}
 .free-label a{color:var(--gold)}
-
-/* RIGHT PANEL — LETTER */
-.letter-panel-top{
-  background:rgba(12,22,40,0.95);border-bottom:1px solid var(--border);
-  padding:0.75rem 1.25rem;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;
-}
+.letter-panel-top{background:rgba(12,22,40,0.95);border-bottom:1px solid var(--border);padding:0.75rem 1.25rem;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
 .gen-letter-label{font-size:0.68rem;font-weight:600;letter-spacing:1px;color:var(--gold);text-transform:uppercase}
 .letter-actions{display:flex;gap:0.4rem}
-.la-btn{
-  background:none;border:1px solid var(--border);color:var(--slate2);
-  font-size:0.74rem;padding:0.3rem 0.7rem;border-radius:5px;
-  display:flex;align-items:center;gap:0.3rem;transition:border-color 0.15s,color 0.15s;
-}
+.la-btn{background:none;border:1px solid var(--border);color:var(--slate2);font-size:0.74rem;padding:0.3rem 0.7rem;border-radius:5px;display:flex;align-items:center;gap:0.3rem;transition:border-color 0.15s,color 0.15s}
 .la-btn:hover{border-color:var(--border2);color:var(--light)}
 .la-btn.pdf{background:var(--gold);border-color:var(--gold);color:var(--navy);font-weight:600}
 .la-btn.pdf:hover{background:var(--gold2)}
 #letter-actions-wrap{display:none}
 #disc-bar{display:none}
-
-/* DISCLAIMER */
-.disclaimer-bar{
-  background:rgba(201,168,76,0.06);border-bottom:1px solid rgba(201,168,76,0.14);
-  padding:0.7rem 1.1rem;display:flex;align-items:flex-start;gap:0.5rem;
-  position:relative;flex-shrink:0;
-}
+.disclaimer-bar{background:rgba(201,168,76,0.06);border-bottom:1px solid rgba(201,168,76,0.14);padding:0.7rem 1.1rem;display:flex;align-items:flex-start;gap:0.5rem;position:relative;flex-shrink:0}
 .disclaimer-bar .warn-icon{color:var(--gold);font-size:0.85rem;flex-shrink:0;margin-top:1px}
 .disclaimer-bar p{font-size:0.74rem;color:var(--slate2);line-height:1.5;padding-right:1.5rem}
 .disclaimer-bar p strong{color:var(--light)}
 .disc-close{position:absolute;top:0.5rem;right:0.75rem;background:none;border:none;color:var(--slate);font-size:1rem;cursor:pointer}
-
-/* LETTER PREVIEW */
 .letter-preview-wrap{flex:1;padding:1.25rem;overflow-y:auto}
-.letter-doc{
-  background:rgba(10,18,35,0.9);
-  border:1px solid var(--border);border-radius:var(--radius);
-  padding:1.75rem;font-family:'Courier New',monospace;
-  font-size:0.77rem;line-height:1.85;color:#aab8d0;
-}
+.letter-doc{background:rgba(10,18,35,0.9);border:1px solid var(--border);border-radius:var(--radius);padding:1.75rem;font-family:'Courier New',monospace;font-size:0.77rem;line-height:1.85;color:#aab8d0}
 .letter-doc .ld-name{font-size:0.85rem;font-weight:600;color:var(--white)}
 .letter-doc .ld-addr,.letter-doc .ld-date{color:var(--slate)}
 .letter-doc .ld-re{font-weight:600;color:var(--white);margin:0.5rem 0 0.25rem}
@@ -459,55 +207,24 @@ nav{
 .letter-doc .ld-sign{color:var(--slate);font-size:0.74rem;margin-top:0.75rem}
 .letter-doc .ld-name-sign{color:#aab8d0;margin-top:0.4rem;font-size:0.78rem}
 .letter-doc .ld-separator{border:none;border-top:1px solid var(--border);margin:0.75rem 0}
-
-.panel-foot{
-  background:rgba(12,22,40,0.95);border-top:1px solid var(--border);
-  padding:0.65rem 1.25rem;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;
-}
+.panel-foot{background:rgba(12,22,40,0.95);border-top:1px solid var(--border);padding:0.65rem 1.25rem;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
 .panel-foot-note{font-size:0.73rem;color:var(--slate);display:flex;align-items:center;gap:0.4rem}
 .panel-foot-note .warn-s{color:var(--gold)}
 .upgrade-link{font-size:0.74rem;color:var(--slate)}
 .upgrade-link a{color:var(--gold)}
-
-/* RESOLUTION */
-.deadline-select{
-  background:var(--navy3);border:1px solid var(--border);
-  border-radius:var(--radius);padding:0.5rem 0.75rem;
-  color:var(--light);font-size:0.84rem;width:160px;outline:none;
-}
+.deadline-select{background:var(--navy3);border:1px solid var(--border);border-radius:var(--radius);padding:0.5rem 0.75rem;color:var(--light);font-size:0.84rem;width:160px;outline:none}
 .res-options{display:flex;flex-direction:column;gap:0.5rem;margin-top:1rem}
-.res-option{
-  background:var(--navy2);border:1px solid var(--border);
-  border-radius:var(--radius);padding:0.65rem 0.9rem;cursor:pointer;
-  font-size:0.81rem;color:var(--slate2);
-  display:flex;align-items:center;gap:0.6rem;transition:all 0.15s;
-}
+.res-option{background:var(--navy2);border:1px solid var(--border);border-radius:var(--radius);padding:0.65rem 0.9rem;cursor:pointer;font-size:0.81rem;color:var(--slate2);display:flex;align-items:center;gap:0.6rem;transition:all 0.15s}
 .res-option:hover{border-color:var(--border2)}
 .res-option.sel{border-color:var(--gold);color:var(--white);background:var(--gold-dim)}
 .res-dot{width:12px;height:12px;border-radius:50%;border:2px solid currentColor;flex-shrink:0}
 .res-option.sel .res-dot{background:var(--gold);border-color:var(--gold)}
-.tip-box{
-  background:var(--navy3);border:1px solid var(--border);
-  border-radius:var(--radius);padding:0.75rem;
-  font-size:0.77rem;color:var(--slate2);margin-top:1.25rem;line-height:1.55;
-}
-
-/* JURISDICTION */
-.juris-note{
-  background:var(--gold-dim);border:1px solid var(--border2);
-  border-radius:var(--radius);padding:0.75rem 0.9rem;
-  font-size:0.77rem;color:var(--gold);margin-top:0.75rem;line-height:1.5;
-  display:flex;align-items:flex-start;gap:0.4rem;
-}
+.tip-box{background:var(--navy3);border:1px solid var(--border);border-radius:var(--radius);padding:0.75rem;font-size:0.77rem;color:var(--slate2);margin-top:1.25rem;line-height:1.55}
+.juris-note{background:var(--gold-dim);border:1px solid var(--border2);border-radius:var(--radius);padding:0.75rem 0.9rem;font-size:0.77rem;color:var(--gold);margin-top:0.75rem;line-height:1.5;display:flex;align-items:flex-start;gap:0.4rem}
 .juris-note .ji{flex-shrink:0;margin-top:1px}
-
-/* DASHBOARD */
 .dash-wrap{max-width:1060px;margin:0 auto;padding:2.5rem 2rem}
 .dash-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2rem;flex-wrap:wrap;gap:1rem}
-.dash-welcome h2{
-  font-family:var(--font-display);
-  font-size:1.5rem;font-weight:700;color:var(--white);margin-bottom:0.2rem;
-}
+.dash-welcome h2{font-family:var(--font-display);font-size:1.5rem;font-weight:700;color:var(--white);margin-bottom:0.2rem}
 .dash-welcome p{color:var(--slate2);font-size:0.83rem}
 .dash-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem;margin-bottom:1.75rem}
 .dstat{background:var(--navy2);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.1rem}
@@ -527,8 +244,6 @@ nav{
 .hist-table tr:hover td{background:var(--navy3)}
 .type-tag{display:inline-block;background:var(--gold-dim);color:var(--gold);font-size:0.69rem;font-weight:600;padding:0.15rem 0.5rem;border-radius:4px}
 .status-ok{color:var(--green);font-size:0.77rem;font-weight:600}
-
-/* LOGIN OVERLAY */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;align-items:center;justify-content:center}
 .overlay.open{display:flex}
 .login-box{background:var(--navy2);border:1px solid var(--border2);border-radius:var(--radius-lg);width:100%;max-width:380px;overflow:hidden;box-shadow:var(--shadow-lg)}
@@ -538,22 +253,12 @@ nav{
 .login-hdr p{color:var(--slate2);font-size:0.82rem;margin-top:0.3rem}
 .login-body{padding:1.5rem}
 .login-body>p{text-align:center;color:var(--slate2);font-size:0.83rem;margin-bottom:1.25rem}
-.sso-btn{
-  width:100%;display:flex;align-items:center;gap:0.75rem;
-  padding:0.7rem 1rem;background:var(--navy3);
-  border:1px solid var(--border);border-radius:var(--radius);
-  font-size:0.84rem;color:var(--light);cursor:pointer;margin-bottom:0.6rem;
-  transition:border-color 0.15s;
-}
+.sso-btn{width:100%;display:flex;align-items:center;gap:0.75rem;padding:0.7rem 1rem;background:var(--navy3);border:1px solid var(--border);border-radius:var(--radius);font-size:0.84rem;color:var(--light);cursor:pointer;margin-bottom:0.6rem;transition:border-color 0.15s}
 .sso-btn:hover{border-color:var(--border2)}
 .login-terms{text-align:center;font-size:0.7rem;color:var(--slate);margin-top:1rem;line-height:1.5}
-
-/* SPINNER */
 .ai-spinner{display:none;flex-direction:column;align-items:center;justify-content:center;padding:3rem;gap:1rem;flex:1}
 .spin{width:34px;height:34px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 0.7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* RESPONSIVE */
 @media(max-width:768px){
   .ltype-grid,.ltypes{grid-template-columns:1fr 1fr}
   .gen-shell{flex-direction:column}
@@ -590,13 +295,11 @@ nav{
       <button class="btn-hero-s" onclick="showPage('dashboard')">View Dashboard</button>
     </div>
   </div>
-
   <div class="stats-strip">
     <div class="stat-item"><h3>50,000+</h3><p>Letters Generated</p></div>
     <div class="stat-item"><h3>140+</h3><p>Countries Supported</p></div>
     <div class="stat-item"><h3>9</h3><p>Letter Types</p></div>
   </div>
-
   <div class="section">
     <div class="sec-label">Practice Areas</div>
     <div class="sec-title">Choose Your Letter Type</div>
@@ -613,7 +316,6 @@ nav{
       <div class="ltype-card" onclick="startGen('credit')"><span class="ltype-icon">📊</span><h3>Credit Report Dispute</h3><p>Dispute inaccurate or fraudulent entries on your credit report</p></div>
     </div>
   </div>
-
   <div class="section" style="padding-top:0">
     <div class="sec-label">Process</div>
     <div class="sec-title">How It Works</div>
@@ -624,13 +326,11 @@ nav{
       <div class="step"><div class="step-n">3</div><h4>AI Drafts &amp; Delivers</h4><p>Our AI produces a legally-sound letter citing applicable national statutes.</p></div>
     </div>
   </div>
-
   <div class="home-cta">
     <h2>Ready to Take Action?</h2>
     <p>Generate unlimited professional demand letters — no subscription required.</p>
     <button class="btn-hero-p" onclick="showPage('generator');renderStep()">Generate Your First Letter →</button>
   </div>
-
   <div class="footer">
     <strong>SueLetter</strong> — AI-Powered Demand Letter Generator. Not a substitute for legal advice. &copy; 2025 SueLetter.
   </div>
@@ -639,13 +339,9 @@ nav{
 <!-- GENERATOR PAGE -->
 <div id="page-generator" class="page">
   <div class="gen-shell">
-    <!-- LEFT: FORM -->
     <div class="gen-left">
       <div class="prog-bar">
-        <div class="prog-header">
-          <div class="doc-icon">📄</div>
-          <span>Letter Details</span>
-        </div>
+        <div class="prog-header"><div class="doc-icon">📄</div><span>Letter Details</span></div>
         <div class="prog-steps" id="prog-steps"></div>
       </div>
       <div class="step-content" id="step-content"></div>
@@ -655,8 +351,6 @@ nav{
         <button class="btn-next" id="btn-next" onclick="nextStep()">Next ›</button>
       </div>
     </div>
-
-    <!-- RIGHT: LETTER PREVIEW -->
     <div class="gen-right">
       <div class="letter-panel-top">
         <span class="gen-letter-label">⚖ Live Preview</span>
@@ -669,7 +363,7 @@ nav{
       </div>
       <div class="disclaimer-bar" id="disc-bar">
         <span class="warn-icon">⚠</span>
-        <p><strong>Disclaimer:</strong> This tool does not provide legal advice. The generated letter is a starting point — consult a licensed attorney before sending for complex legal matters. No attorney-client relationship is formed.</p>
+        <p><strong>Disclaimer:</strong> This tool does not provide legal advice. The generated letter is a starting point — consult a licensed attorney before sending for complex legal matters.</p>
         <button class="disc-close" onclick="document.getElementById('disc-bar').style.display='none'">×</button>
       </div>
       <div id="ai-spinner" class="ai-spinner">
@@ -738,22 +432,10 @@ nav{
     </div>
     <h3 style="font-size:0.92rem;font-weight:600;margin-bottom:0.75rem;color:var(--white)">Letter History</h3>
     <table class="hist-table">
-      <thead>
-        <tr><th>Date</th><th>Type</th><th>Recipient</th><th>Amount</th><th>Status</th></tr>
-      </thead>
+      <thead><tr><th>Date</th><th>Type</th><th>Recipient</th><th>Amount</th><th>Status</th></tr></thead>
       <tbody>
-        <tr>
-          <td>Dec 10, 2024</td>
-          <td><span class="type-tag">Debt Recovery</span></td>
-          <td>ABC Contractors Ltd.</td>
-          <td>$4,500</td>
-          <td><span class="status-ok">✓ Generated</span></td>
-        </tr>
-        <tr>
-          <td colspan="5" style="text-align:center;color:var(--slate);font-style:italic;padding:1.25rem">
-            No more letters yet. <a href="#" onclick="showPage('generator');renderStep()">Generate one →</a>
-          </td>
-        </tr>
+        <tr><td>Dec 10, 2024</td><td><span class="type-tag">Debt Recovery</span></td><td>ABC Contractors Ltd.</td><td>$4,500</td><td><span class="status-ok">✓ Generated</span></td></tr>
+        <tr><td colspan="5" style="text-align:center;color:var(--slate);font-style:italic;padding:1.25rem">No more letters yet. <a href="#" onclick="showPage('generator');renderStep()">Generate one →</a></td></tr>
       </tbody>
     </table>
   </div>
@@ -781,50 +463,34 @@ let auth0Client = null;
 let isLoggedIn = false;
 let currentUser = null;
 
-// CRITICAL FIX: Initialize Auth0 on page load with proper error handling
 async function initAuth0() {
   try {
-    // Wait for Auth0 SDK to be available
-    let attempts = 0;
-    while (typeof Auth0Client === 'undefined' && attempts < 50) {
-      await new Promise(r => setTimeout(r, 100));
-      attempts++;
-    }
-
-    if (typeof Auth0Client === 'undefined') {
-      console.error('❌ Auth0 SDK failed to load after 5 seconds');
-      return;
-    }
-
-    // Create Auth0 client
-auth0Client = await createAuth0Client({
-  domain: 'dev-ej7oma8mgej73zwb.eu.auth0.com',
-  clientId: 'bV9k1JybdoaIGE8MSCWerNw1dxzN2rHZ',
-  authorizationParams: {
-    redirect_uri: window.location.origin,
-    audience: 'https://sueletter-api',
-    scope: 'openid profile email'
-  }
-});
+    // ✅ createAuth0Client comes from the SDK loaded in <head>
+    auth0Client = await createAuth0Client({
+      domain: 'dev-ej7oma8mgej73zwb.eu.auth0.com',
+      clientId: 'bV9k1JybdoaIGE8MSCWerNw1dxzN2rHZ',
+      authorizationParams: {
+        redirect_uri: window.location.origin,
+        audience: 'https://sueletter-api',
+        scope: 'openid profile email'
+      }
+    });
 
     console.log('✅ Auth0 Client initialized');
 
-    // Handle redirect callback
+    // Handle redirect callback after login
     const query = window.location.search;
     if (query.includes('code=') && query.includes('state=')) {
-      console.log('Processing Auth0 callback...');
       await auth0Client.handleRedirectCallback();
       window.history.replaceState({}, document.title, window.location.pathname);
     }
 
-    // Check if user is logged in
     isLoggedIn = await auth0Client.isAuthenticated();
     if (isLoggedIn) {
       currentUser = await auth0Client.getUser();
       console.log('✅ User logged in:', currentUser.email);
       updateUIAfterLogin();
     } else {
-      console.log('User not logged in');
       updateUIBeforeLogin();
     }
 
@@ -837,9 +503,7 @@ function updateUIAfterLogin() {
   const navBtn = document.getElementById('nav-auth-btn');
   const logoutBtn = document.getElementById('dash-logout-btn');
   const greeting = document.getElementById('dash-greeting');
-  
-  if (navBtn) navBtn.textContent = '✓ Logged In';
-  if (navBtn) navBtn.onclick = () => showPage('dashboard');
+  if (navBtn) { navBtn.textContent = '✓ Logged In'; navBtn.onclick = () => showPage('dashboard'); }
   if (logoutBtn) logoutBtn.style.display = 'block';
   if (greeting && currentUser) greeting.textContent = `Welcome back, ${currentUser.given_name || currentUser.name || 'User'}`;
 }
@@ -847,41 +511,22 @@ function updateUIAfterLogin() {
 function updateUIBeforeLogin() {
   const navBtn = document.getElementById('nav-auth-btn');
   const logoutBtn = document.getElementById('dash-logout-btn');
-  
-  if (navBtn) navBtn.textContent = 'Log in';
-  if (navBtn) navBtn.onclick = handleAuthClick;
+  if (navBtn) { navBtn.textContent = 'Log in'; navBtn.onclick = handleAuthClick; }
   if (logoutBtn) logoutBtn.style.display = 'none';
 }
 
 async function handleAuthClick() {
-  if (isLoggedIn) {
-    showPage('dashboard');
-  } else {
-    openLogin();
-  }
+  if (isLoggedIn) { showPage('dashboard'); } else { openLogin(); }
 }
 
-function openLogin() {
-  document.getElementById('login-overlay').classList.add('open');
-}
-
-function closeLogin() {
-  document.getElementById('login-overlay').classList.remove('open');
-}
+function openLogin() { document.getElementById('login-overlay').classList.add('open'); }
+function closeLogin() { document.getElementById('login-overlay').classList.remove('open'); }
 
 async function handleLogin(connection) {
-  // Wait for auth0Client to be ready
-  let waited = 0;
-  while (!auth0Client && waited < 5000) {
-    await new Promise(r => setTimeout(r, 100));
-    waited += 100;
-  }
-
   if (!auth0Client) {
-    alert('Login service failed to load. Please refresh the page and try again.');
+    alert('Login service is still loading. Please wait a moment and try again.');
     return;
   }
-
   try {
     await auth0Client.loginWithRedirect({
       authorizationParams: {
@@ -891,56 +536,36 @@ async function handleLogin(connection) {
     });
   } catch (err) {
     console.error('Login error:', err);
-    alert('Login failed. Please try again.');
+    alert('Login failed: ' + err.message);
   }
 }
 
 async function logout() {
-  if (auth0Client) {
-    try {
-      await auth0Client.logout({
-        logoutParams: {
-          returnTo: window.location.origin + window.location.pathname
-        }
-      });
-      isLoggedIn = false;
-      currentUser = null;
-      updateUIBeforeLogin();
-      closeLogin();
-      showPage('home');
-    } catch (err) {
-      console.error('Logout error:', err);
-    }
+  if (!auth0Client) return;
+  try {
+    await auth0Client.logout({ logoutParams: { returnTo: window.location.origin } });
+    isLoggedIn = false;
+    currentUser = null;
+    updateUIBeforeLogin();
+    showPage('home');
+  } catch (err) {
+    console.error('Logout error:', err);
   }
 }
 
-/* ── CONFIGURATION ─────────────────────────────────────────────── */
-
 /* ── CONSTANTS ─────────────────────────────────────────────────── */
 const TYPE_LABELS = {
-  debt:'Debt Recovery',
-  landlord:'Landlord / Tenant Dispute',
-  refund:'Refund & Consumer',
-  property:'Property Damage',
-  cease:'Cease & Desist',
-  employment:'Employment Dispute',
-  insurance:'Insurance Claim',
-  contractor:'Contractor Dispute',
-  credit:'Credit Report Dispute'
+  debt:'Debt Recovery', landlord:'Landlord / Tenant Dispute', refund:'Refund & Consumer',
+  property:'Property Damage', cease:'Cease & Desist', employment:'Employment Dispute',
+  insurance:'Insurance Claim', contractor:'Contractor Dispute', credit:'Credit Report Dispute'
 };
-
 const TYPE_RE = {
-  debt:'FORMAL DEMAND — DEBT RECOVERY',
-  landlord:'LANDLORD / TENANT DISPUTE — FORMAL DEMAND',
-  refund:'REFUND DEMAND — CONSUMER RIGHTS',
-  property:'PROPERTY DAMAGE — FORMAL DEMAND',
-  cease:'CEASE & DESIST — FORMAL DEMAND',
-  employment:'EMPLOYMENT DISPUTE — FORMAL DEMAND',
-  insurance:'INSURANCE CLAIM DISPUTE',
-  contractor:'CONTRACTOR DISPUTE — FORMAL DEMAND',
+  debt:'FORMAL DEMAND — DEBT RECOVERY', landlord:'LANDLORD / TENANT DISPUTE — FORMAL DEMAND',
+  refund:'REFUND DEMAND — CONSUMER RIGHTS', property:'PROPERTY DAMAGE — FORMAL DEMAND',
+  cease:'CEASE & DESIST — FORMAL DEMAND', employment:'EMPLOYMENT DISPUTE — FORMAL DEMAND',
+  insurance:'INSURANCE CLAIM DISPUTE', contractor:'CONTRACTOR DISPUTE — FORMAL DEMAND',
   credit:'CREDIT REPORT DISPUTE — FORMAL DEMAND'
 };
-
 const COUNTRY_LAWS = {
   'United States':'the FDCPA, FCRA, UCC, and applicable state consumer protection statutes',
   'United Kingdom':'the Consumer Rights Act 2015 and Limitation Act 1980',
@@ -953,22 +578,18 @@ const COUNTRY_LAWS = {
   'South Africa':'the Consumer Protection Act 68 of 2008',
   'Other':'applicable local civil law and consumer protection statutes'
 };
-
 const EV_TYPES = [
   'Signed contracts or agreements','Invoices or receipts','Email correspondence',
   'Photographs or videos','Text messages or chat logs','Bank or payment statements',
   'Police or incident report','Medical records or bills','Witness statements',
   'Property appraisal or estimate','Lease agreement','Pay stubs or W-2 forms'
 ];
-
 const CURRENCIES = ['USD $','GBP £','EUR €','CAD $','AUD $'];
 const ROLES = ['','Individual','Business Owner','Landlord','Employer','Contractor','Insurance Adjuster','Other'];
 const LANGUAGES = ['English','Spanish','French','German','Portuguese','Arabic'];
 const STEPS = ['Letter','Sender','Recipient','Dispute','Resolution','Jurisdiction','Tone','Evidence','Prior Contact'];
-
 const LETTER_TYPE_ICONS = {
-  debt:'💰',landlord:'🏠',refund:'🛒',property:'🏚',
-  cease:'🚫',employment:'💼',insurance:'📋',contractor:'🔧',credit:'📊'
+  debt:'💰',landlord:'🏠',refund:'🛒',property:'🏚',cease:'🚫',employment:'💼',insurance:'📋',contractor:'🔧',credit:'📊'
 };
 const LETTER_TYPE_DESCS = {
   debt:'Recover unpaid debts and outstanding invoices',
@@ -987,31 +608,22 @@ let step = 1;
 const totalSteps = 9;
 let isEditing = false;
 let letterGenerated = false;
-
 let formData = {
-  type: '', tone: 'firm', country: 'United States', jurisdiction: '', language: 'English',
-  deadline: '14', resolution: '', prior: false, evidence: [], dispute: '',
-  amount: '5000', currency: 'USD $', incidentDate: '',
-  senderName: '', senderAddr: '', senderCity: '', senderState: '', senderZip: '',
-  senderPhone: '', senderEmail: '',
-  recName: '', recAddr: '', recCity: '', recState: '', recZip: '',
-  recEmail: '', recRole: '', recCompany: ''
+  type:'', tone:'firm', country:'United States', jurisdiction:'', language:'English',
+  deadline:'14', resolution:'', prior:false, evidence:[], dispute:'',
+  amount:'5000', currency:'USD $', incidentDate:'',
+  senderName:'', senderAddr:'', senderCity:'', senderState:'', senderZip:'',
+  senderPhone:'', senderEmail:'',
+  recName:'', recAddr:'', recCity:'', recState:'', recZip:'',
+  recEmail:'', recRole:'', recCompany:''
 };
 
 /* ── UTILITIES ─────────────────────────────────────────────────── */
-function escHtml(t) {
-  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-function esc(t) {
-  return (t || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
+function escHtml(t){ return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function esc(t){ return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function getLetterText() {
   const doc = document.getElementById('letter-doc');
   if (!doc) return null;
-  const pre = doc.querySelector('pre');
-  if (pre) return pre.innerText;
   const ta = doc.querySelector('textarea');
   if (ta) return ta.value;
   return doc.innerText;
@@ -1019,26 +631,13 @@ function getLetterText() {
 
 /* ── PAGE ROUTING ──────────────────────────────────────────────── */
 function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => {
-    p.classList.remove('active');
-    p.style.display = '';
-  });
+  document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display = ''; });
   const pg = document.getElementById('page-' + id);
-  if (id === 'generator') {
-    pg.style.display = 'flex';
-    pg.classList.add('active');
-  } else {
-    pg.classList.add('active');
-  }
+  if (id === 'generator') { pg.style.display = 'flex'; pg.classList.add('active'); }
+  else { pg.classList.add('active'); }
   window.scrollTo(0, 0);
 }
-
-function startGen(type) {
-  formData.type = type;
-  step = 1;
-  showPage('generator');
-  renderStep();
-}
+function startGen(type) { formData.type = type; step = 1; showPage('generator'); renderStep(); }
 
 /* ── PROGRESS BAR ──────────────────────────────────────────────── */
 function buildProgBar() {
@@ -1082,30 +681,24 @@ ${Object.entries(TYPE_LABELS).map(([k,v]) =>
     <span class="td">${LETTER_TYPE_DESCS[k]}</span>
   </button>`).join('')}
 </div>`;
-  }
-  else if (step === 2) {
+  } else if (step === 2) {
     c.innerHTML = `<div class="step-title">Your contact details</div>
 <p class="step-desc">This information will appear as the sender in your demand letter.</p>
 <div class="field-group">
   <div class="field" style="grid-column:1/-1"><label>Full Name <span class="req">*</span></label><input type="text" placeholder="Jane Smith" value="${esc(formData.senderName)}" oninput="formData.senderName=this.value;updateLetterSender()"/></div>
-  <div class="field"><label>Street Address <span class="req">*</span></label><input type="text" placeholder="123 Main Street, Apt 4B" value="${esc(formData.senderAddr)}" oninput="formData.senderAddr=this.value;updateLetterSender()"/></div>
+  <div class="field"><label>Street Address <span class="req">*</span></label><input type="text" placeholder="123 Main Street" value="${esc(formData.senderAddr)}" oninput="formData.senderAddr=this.value;updateLetterSender()"/></div>
   <div class="field"><label>City <span class="req">*</span></label><input type="text" placeholder="Los Angeles" value="${esc(formData.senderCity)}" oninput="formData.senderCity=this.value;updateLetterSender()"/></div>
   <div class="field"><label>State / Province <span class="req">*</span></label><input type="text" placeholder="California" value="${esc(formData.senderState)}" oninput="formData.senderState=this.value;updateLetterSender()"/></div>
   <div class="field"><label>ZIP / Postal Code <span class="req">*</span></label><input type="text" placeholder="90001" value="${esc(formData.senderZip)}" oninput="formData.senderZip=this.value;updateLetterSender()"/></div>
   <div class="field"><label>Phone Number</label><input type="tel" placeholder="(310) 555-0123" value="${esc(formData.senderPhone)}" oninput="formData.senderPhone=this.value;updateLetterSender()"/></div>
   <div class="field" style="grid-column:1/-1"><label>Email Address <span class="req">*</span></label><input type="email" placeholder="jane@example.com" value="${esc(formData.senderEmail)}" oninput="formData.senderEmail=this.value;updateLetterSender()"/></div>
 </div>`;
-  }
-  else if (step === 3) {
+  } else if (step === 3) {
     c.innerHTML = `<div class="step-title">Recipient details</div>
 <p class="step-desc">Who are you sending this demand letter to?</p>
 <div class="field-group">
   <div class="field" style="grid-column:1/-1"><label>Full Name or Company <span class="req">*</span></label><input type="text" placeholder="John Doe or Acme Corp." value="${esc(formData.recName)}" oninput="formData.recName=this.value;updateLetterRecipient()"/></div>
-  <div class="field"><label>Role / Title</label>
-    <select onchange="formData.recRole=this.value">
-      ${ROLES.map(r => `<option value="${r}"${formData.recRole===r?' selected':''}>${r||'Select role…'}</option>`).join('')}
-    </select>
-  </div>
+  <div class="field"><label>Role / Title</label><select onchange="formData.recRole=this.value">${ROLES.map(r=>`<option value="${r}"${formData.recRole===r?' selected':''}>${r||'Select role…'}</option>`).join('')}</select></div>
   <div class="field"><label>Company (if different)</label><input type="text" placeholder="Company Name Inc." value="${esc(formData.recCompany)}" oninput="formData.recCompany=this.value"/></div>
   <div class="field"><label>Street Address <span class="req">*</span></label><input type="text" placeholder="456 Oak Avenue" value="${esc(formData.recAddr)}" oninput="formData.recAddr=this.value;updateLetterRecipient()"/></div>
   <div class="field"><label>City <span class="req">*</span></label><input type="text" placeholder="San Francisco" value="${esc(formData.recCity)}" oninput="formData.recCity=this.value;updateLetterRecipient()"/></div>
@@ -1113,8 +706,7 @@ ${Object.entries(TYPE_LABELS).map(([k,v]) =>
   <div class="field"><label>ZIP / Postal Code</label><input type="text" placeholder="94102" value="${esc(formData.recZip)}" oninput="formData.recZip=this.value"/></div>
   <div class="field" style="grid-column:1/-1"><label>Recipient Email</label><input type="email" placeholder="recipient@gmail.com" value="${esc(formData.recEmail)}" oninput="formData.recEmail=this.value"/></div>
 </div>`;
-  }
-  else if (step === 4) {
+  } else if (step === 4) {
     c.innerHTML = `<div class="step-title">Dispute details</div>
 <p class="step-desc">Describe your situation in detail. More information leads to a stronger letter.</p>
 <div class="field" style="margin-bottom:0.75rem">
@@ -1129,58 +721,40 @@ ${Object.entries(TYPE_LABELS).map(([k,v]) =>
   <div class="field"><label>Amount demanded <span class="req">*</span></label>
     <div style="display:flex;gap:0.5rem">
       <select style="background:var(--navy3);border:1px solid var(--border);border-radius:var(--radius);padding:0.55rem 0.5rem;color:var(--light);font-size:0.82rem;width:90px;outline:none" onchange="formData.currency=this.value">
-        ${CURRENCIES.map(cur => `<option${formData.currency===cur?' selected':''}>${cur}</option>`).join('')}
+        ${CURRENCIES.map(cur=>`<option${formData.currency===cur?' selected':''}>${cur}</option>`).join('')}
       </select>
       <input type="number" placeholder="5000" value="${formData.amount}" style="flex:1" oninput="formData.amount=this.value"/>
     </div>
   </div>
 </div>`;
-  }
-  else if (step === 5) {
+  } else if (step === 5) {
     const dlOpts = ['7','14','21','30','45','60'];
     const resOpts = ['Full payment or refund','Cease all offending conduct','Repair or replace damaged property','Return of security deposit','Reinstatement of employment','Insurance claim settlement','Credit report correction'];
     c.innerHTML = `<div class="step-title">Resolution request</div>
 <p class="step-desc">What do you want the other party to do, and by when?</p>
-<div class="field" style="margin-bottom:1.25rem">
-  <label>Response deadline <span class="req">*</span></label>
-  <select class="deadline-select" onchange="formData.deadline=this.value">
-    ${dlOpts.map(o => `<option value="${o}"${formData.deadline===o?' selected':''}>${o} days</option>`).join('')}
-  </select>
+<div class="field" style="margin-bottom:1.25rem"><label>Response deadline <span class="req">*</span></label>
+  <select class="deadline-select" onchange="formData.deadline=this.value">${dlOpts.map(o=>`<option value="${o}"${formData.deadline===o?' selected':''}>${o} days</option>`).join('')}</select>
 </div>
 <div class="field" style="margin-bottom:1rem"><label>Preferred resolution <span class="req">*</span></label></div>
-<div class="res-options">
-${resOpts.map(o => `<div class="res-option${formData.resolution===o?' sel':''}" onclick="selectResolution('${o}',this)"><div class="res-dot"></div>${o}</div>`).join('')}
-</div>
-<div class="tip-box">💡 <strong>Tip:</strong> A 14-day deadline is standard for most demand letters. Courts generally view 14–30 days as reasonable notice.</div>`;
-  }
-  else if (step === 6) {
+<div class="res-options">${resOpts.map(o=>`<div class="res-option${formData.resolution===o?' sel':''}" onclick="selectResolution('${o}',this)"><div class="res-dot"></div>${o}</div>`).join('')}</div>
+<div class="tip-box">💡 <strong>Tip:</strong> A 14-day deadline is standard for most demand letters.</div>`;
+  } else if (step === 6) {
     const countries = ['United States','United Kingdom','Canada','Australia','India','Germany','France','UAE','South Africa','Pakistan','Nigeria','Brazil','Mexico','Other'];
     const states = ['Alabama','Alaska','Arizona','California','Colorado','Florida','Georgia','Illinois','Massachusetts','Michigan','New York','Ohio','Texas','Washington','Other'];
     c.innerHTML = `<div class="step-title">Jurisdiction</div>
-<p class="step-desc">Select your country so we can auto-cite the correct national laws and regulations in your demand letter.</p>
-<div class="field" style="margin-bottom:1.25rem">
-  <label>Country <span class="req">*</span></label>
-  <select id="f-country" onchange="formData.country=this.value;updateJurisNote()">
-    ${countries.map(ctr => `<option${formData.country===ctr?' selected':''}>${ctr}</option>`).join('')}
-  </select>
+<p class="step-desc">Select your country so we can auto-cite the correct national laws.</p>
+<div class="field" style="margin-bottom:1.25rem"><label>Country <span class="req">*</span></label>
+  <select id="f-country" onchange="formData.country=this.value;updateJurisNote()">${countries.map(ctr=>`<option${formData.country===ctr?' selected':''}>${ctr}</option>`).join('')}</select>
 </div>
 <div id="juris-note" class="juris-note"><span class="ji">📍</span><span id="juris-note-text"></span></div>
-<div class="field" style="margin-top:1.25rem;margin-bottom:1rem">
-  <label>State / Jurisdiction</label>
-  <select onchange="formData.jurisdiction=this.value">
-    ${states.map(s => `<option${formData.jurisdiction===s?' selected':''}>${s}</option>`).join('')}
-  </select>
+<div class="field" style="margin-top:1.25rem;margin-bottom:1rem"><label>State / Jurisdiction</label>
+  <select onchange="formData.jurisdiction=this.value">${states.map(s=>`<option${formData.jurisdiction===s?' selected':''}>${s}</option>`).join('')}</select>
 </div>
-<p style="font-size:0.76rem;color:var(--slate2);margin-bottom:1.25rem">Your state determines which statutes and consumer protection laws apply to your letter.</p>
-<div class="field">
-  <label>Letter Language <span class="req">*</span></label>
-  <select onchange="formData.language=this.value">
-    ${LANGUAGES.map(l => `<option${formData.language===l?' selected':''}>${l}</option>`).join('')}
-  </select>
+<div class="field"><label>Letter Language <span class="req">*</span></label>
+  <select onchange="formData.language=this.value">${LANGUAGES.map(l=>`<option${formData.language===l?' selected':''}>${l}</option>`).join('')}</select>
 </div>`;
     setTimeout(updateJurisNote, 50);
-  }
-  else if (step === 7) {
+  } else if (step === 7) {
     c.innerHTML = `<div class="step-title">Letter tone</div>
 <p class="step-desc">Choose how assertive your demand letter should be.</p>
 <div class="tone-cards">
@@ -1189,7 +763,7 @@ ${resOpts.map(o => `<div class="res-option${formData.resolution===o?' sel':''}" 
     <div class="tone-info">
       <div class="tone-name">Firm <span style="color:var(--slate);font-weight:400">— Professional &amp; measured</span> <span class="tone-badge rec">Recommended</span></div>
       <div class="tone-desc">Best for initial demands — firm but leaves room for resolution.</div>
-      <div class="tone-quote">"I am writing to formally request payment of the outstanding amount of $[X] within 14 days. I trust that we can resolve this matter amicably without further action."</div>
+      <div class="tone-quote">"I am writing to formally request payment of the outstanding amount within 14 days."</div>
     </div>
   </div>
   <div class="tone-card${formData.tone==='assertive'?' sel':''}" onclick="setTone('assertive',this)">
@@ -1197,38 +771,29 @@ ${resOpts.map(o => `<div class="res-option${formData.resolution===o?' sel':''}" 
     <div class="tone-info">
       <div class="tone-name">Assertive <span style="color:var(--slate);font-weight:400">— Stronger &amp; direct</span></div>
       <div class="tone-desc">Use when prior communication has been ignored.</div>
-      <div class="tone-quote">"You are hereby notified that your failure to remit payment constitutes a material breach. I demand immediate payment of $[X] within 14 days. Failure to comply will result in legal action."</div>
+      <div class="tone-quote">"You are hereby notified that your failure to remit payment constitutes a material breach."</div>
     </div>
   </div>
   <div class="tone-card${formData.tone==='final'?' sel':''}" onclick="setTone('final',this)">
     <div class="tone-radio"></div>
     <div class="tone-info">
       <div class="tone-name">Final Warning <span style="color:var(--slate);font-weight:400">— Maximum urgency</span> <span class="tone-badge last">Last resort</span></div>
-      <div class="tone-desc">Use only after multiple failed attempts. High pressure language.</div>
-      <div class="tone-quote">"FINAL NOTICE: This is your last opportunity to resolve this matter before I file a lawsuit. Unless full payment of $[X] is received within 7 days, I will file without further notice."</div>
+      <div class="tone-desc">Use only after multiple failed attempts.</div>
+      <div class="tone-quote">"FINAL NOTICE: This is your last opportunity to resolve this matter before I file a lawsuit."</div>
     </div>
   </div>
 </div>`;
-  }
-  else if (step === 8) {
+  } else if (step === 8) {
     c.innerHTML = `<div class="step-title">Evidence &amp; documentation</div>
-<p class="step-desc">Upload photos or select evidence types you have. This strengthens your legal position.</p>
+<p class="step-desc">Select evidence types you have. This strengthens your legal position.</p>
 <div class="upload-zone" onclick="document.getElementById('ev-file').click()">
   <input type="file" id="ev-file" multiple accept="image/*,.pdf"/>
   <div class="up-icon">⬆</div>
-  <p style="font-size:0.82rem;color:var(--slate2)">Drag &amp; drop images here</p>
-  <p style="font-size:0.73rem;color:var(--slate)">or <span style="color:var(--gold)">choose files</span> · JPG, PNG, GIF, PDF</p>
+  <p style="font-size:0.82rem;color:var(--slate2)">Drag &amp; drop files here</p>
+  <p style="font-size:0.73rem;color:var(--slate)">or <span style="color:var(--gold)">choose files</span> · JPG, PNG, PDF</p>
 </div>
-<p style="font-size:0.75rem;color:var(--slate);margin:0.5rem 0">Upload Evidence Images (optional · max 10 files · 5MB each)</p>
-<div class="ev-types">
-${EV_TYPES.map(t => `<div class="ev-type${formData.evidence.includes(t)?' sel':''}" onclick="toggleEvidence('${t}',this)"><div class="ev-check"></div>${t}</div>`).join('')}
-</div>
-<div class="field" style="margin-top:1rem">
-  <label>Additional evidence details (optional)</label>
-  <textarea placeholder="Describe any other supporting evidence you have, including reference numbers, dates, or locations…" style="min-height:70px"></textarea>
-</div>`;
-  }
-  else if (step === 9) {
+<div class="ev-types">${EV_TYPES.map(t=>`<div class="ev-type${formData.evidence.includes(t)?' sel':''}" onclick="toggleEvidence('${t}',this)"><div class="ev-check"></div>${t}</div>`).join('')}</div>`;
+  } else if (step === 9) {
     c.innerHTML = `<div class="step-title">Prior contact attempts</div>
 <p class="step-desc">Have you already tried to resolve this matter with the other party?</p>
 <div class="prior-card">
@@ -1244,503 +809,324 @@ ${EV_TYPES.map(t => `<div class="ev-type${formData.evidence.includes(t)?' sel':'
     </div>
   </div>
 </div>
-<div class="prior-note" id="prior-note">
-  ${formData.prior
-    ? 'Prior contact noted. The letter will reference your previous attempts to resolve this matter, which strengthens your legal position.'
-    : 'No prior contact noted. The letter will be written as an initial demand, which is perfectly valid. Many recipients respond to the first formal demand.'}
-</div>`;
+<div class="prior-note" id="prior-note">${formData.prior ? 'Prior contact noted. The letter will reference your previous attempts to resolve this matter.' : 'No prior contact noted. The letter will be written as an initial demand.'}</div>`;
   }
 }
 
 /* ── FORM HELPERS ──────────────────────────────────────────────── */
-function selectType(k, el) {
-  formData.type = k;
-  document.querySelectorAll('.ltype-btn').forEach(b => b.classList.remove('sel'));
-  el.classList.add('sel');
-  updateLetterRE();
+function selectType(k,el){ formData.type=k; document.querySelectorAll('.ltype-btn').forEach(b=>b.classList.remove('sel')); el.classList.add('sel'); updateLetterRE(); }
+function selectResolution(o,el){ formData.resolution=o; document.querySelectorAll('.res-option').forEach(r=>r.classList.remove('sel')); el.classList.add('sel'); }
+function setTone(t,el){ formData.tone=t; document.querySelectorAll('.tone-card').forEach(c=>c.classList.remove('sel')); el.classList.add('sel'); }
+function toggleEvidence(t,el){ el.classList.toggle('sel'); if(formData.evidence.includes(t)){formData.evidence=formData.evidence.filter(e=>e!==t);}else{formData.evidence.push(t);} }
+function togglePrior(){
+  formData.prior=!formData.prior;
+  document.getElementById('prior-toggle').classList.toggle('on',formData.prior);
+  document.getElementById('prior-fields').style.display=formData.prior?'block':'none';
+  document.getElementById('prior-note').textContent=formData.prior?'Prior contact noted. The letter will reference your previous attempts.':'No prior contact noted. The letter will be written as an initial demand.';
 }
 
-function selectResolution(o, el) {
-  formData.resolution = o;
-  document.querySelectorAll('.res-option').forEach(r => r.classList.remove('sel'));
-  el.classList.add('sel');
+/* ── LIVE PREVIEW ──────────────────────────────────────────────── */
+function updateJurisNote(){
+  const el=document.getElementById('f-country'); if(!el) return;
+  const law=COUNTRY_LAWS[el.value]||COUNTRY_LAWS['Other'];
+  const n=document.getElementById('juris-note-text');
+  if(n) n.textContent=el.value+' law applies. Relevant statutes including '+law+' will be automatically cited.';
 }
-
-function setTone(t, el) {
-  formData.tone = t;
-  document.querySelectorAll('.tone-card').forEach(c => c.classList.remove('sel'));
-  el.classList.add('sel');
+function updateLetterRE(){ const el=document.getElementById('ld-re'); if(el&&formData.type) el.textContent='RE: '+(TYPE_RE[formData.type]||'FORMAL DEMAND LETTER'); }
+function updateLetterSender(){
+  const name=document.getElementById('ld-sender');
+  const addr=document.getElementById('ld-addr');
+  const cont=document.getElementById('ld-contact');
+  const sign=document.getElementById('ld-sign-name');
+  if(name) name.textContent=formData.senderName||'YOUR NAME';
+  if(addr) addr.textContent=[formData.senderAddr,formData.senderCity,formData.senderState,formData.senderZip].filter(Boolean).join(', ')||'Your Address, City, ST ZIP';
+  if(cont) cont.textContent=[formData.senderEmail,formData.senderPhone].filter(Boolean).join(' · ');
+  if(sign) sign.textContent=formData.senderName||'Your Name';
 }
-
-function toggleEvidence(t, el) {
-  el.classList.toggle('sel');
-  if (formData.evidence.includes(t)) {
-    formData.evidence = formData.evidence.filter(e => e !== t);
-  } else {
-    formData.evidence.push(t);
-  }
+function updateLetterRecipient(){
+  const rn=document.getElementById('ld-rec-name');
+  const ra=document.getElementById('ld-rec-addr');
+  if(rn) rn.textContent=formData.recName||'Recipient Name';
+  if(ra) ra.textContent=[formData.recAddr,formData.recCity,formData.recState,formData.recZip].filter(Boolean).join(', ')||'Recipient Address';
 }
-
-function togglePrior() {
-  formData.prior = !formData.prior;
-  document.getElementById('prior-toggle').classList.toggle('on', formData.prior);
-  document.getElementById('prior-fields').style.display = formData.prior ? 'block' : 'none';
-  document.getElementById('prior-note').textContent = formData.prior
-    ? 'Prior contact noted. The letter will reference your previous attempts to resolve this matter, which strengthens your legal position.'
-    : 'No prior contact noted. The letter will be written as an initial demand, which is perfectly valid. Many recipients respond to the first formal demand.';
-}
-
-/* ── LIVE PREVIEW UPDATERS ─────────────────────────────────────── */
-function updateJurisNote() {
-  const el = document.getElementById('f-country');
-  if (!el) return;
-  const law = COUNTRY_LAWS[el.value] || COUNTRY_LAWS['Other'];
-  const n = document.getElementById('juris-note-text');
-  if (n) n.textContent = el.value + ' law applies. Relevant statutes including ' + law + ' will be automatically cited in your demand letter.';
-}
-
-function updateLetterRE() {
-  const el = document.getElementById('ld-re');
-  if (el && formData.type) el.textContent = 'RE: ' + (TYPE_RE[formData.type] || 'FORMAL DEMAND LETTER');
-}
-
-function updateLetterSender() {
-  const name = document.getElementById('ld-sender');
-  const addr = document.getElementById('ld-addr');
-  const cont = document.getElementById('ld-contact');
-  const sign = document.getElementById('ld-sign-name');
-  if (name) name.textContent = formData.senderName || 'YOUR NAME';
-  if (addr) addr.textContent = [formData.senderAddr, formData.senderCity, formData.senderState, formData.senderZip].filter(Boolean).join(', ') || 'Your Address, City, ST ZIP';
-  if (cont) cont.textContent = [formData.senderEmail, formData.senderPhone].filter(Boolean).join(' · ');
-  if (sign) sign.textContent = formData.senderName || 'Your Name';
-}
-
-function updateLetterRecipient() {
-  const rn = document.getElementById('ld-rec-name');
-  const ra = document.getElementById('ld-rec-addr');
-  if (rn) rn.textContent = formData.recName || 'Recipient Name';
-  if (ra) ra.textContent = [formData.recAddr, formData.recCity, formData.recState, formData.recZip].filter(Boolean).join(', ') || 'Recipient Address';
-}
-
-function elaborateDispute() {
-  const el = document.getElementById('f-dispute');
-  if (!el || !el.value.trim()) return;
-  const orig = el.value;
-  el.value = 'Elaborating with AI…';
-  el.disabled = true;
-  setTimeout(() => {
-    el.value = orig + '\n\nThe above-described conduct constitutes a clear breach of the agreement entered into between the parties. Despite reasonable expectations and prior notices, the respondent has willfully failed to fulfill their contractual and legal obligations, causing substantial and ongoing harm to the claimant. The timeline of events demonstrates a consistent pattern of non-compliance that cannot be attributed to mere oversight or administrative delay.';
-    el.disabled = false;
-    formData.dispute = el.value;
-  }, 1200);
+function elaborateDispute(){
+  const el=document.getElementById('f-dispute'); if(!el||!el.value.trim()) return;
+  const orig=el.value; el.value='Elaborating with AI…'; el.disabled=true;
+  setTimeout(()=>{ el.value=orig+'\n\nThe above-described conduct constitutes a clear breach of the agreement entered into between the parties. Despite reasonable expectations and prior notices, the respondent has willfully failed to fulfill their contractual and legal obligations, causing substantial and ongoing harm to the claimant.'; el.disabled=false; formData.dispute=el.value; },1200);
 }
 
 /* ── NAVIGATION ────────────────────────────────────────────────── */
-function nextStep() {
-  if (step === 1 && !formData.type) { alert('Please select a letter type to continue.'); return; }
-  if (step === 2) {
-    if (!formData.senderName.trim()) { alert('Please enter your full name.'); return; }
-    if (!formData.senderAddr.trim()) { alert('Please enter your street address.'); return; }
-    if (!formData.senderCity.trim()) { alert('Please enter your city.'); return; }
-    if (!formData.senderState.trim()) { alert('Please enter your state/province.'); return; }
-    if (!formData.senderZip.trim()) { alert('Please enter your ZIP/postal code.'); return; }
-    if (!formData.senderEmail.trim()) { alert('Please enter your email address.'); return; }
+function nextStep(){
+  if(step===1&&!formData.type){alert('Please select a letter type to continue.');return;}
+  if(step===2){
+    if(!formData.senderName.trim()){alert('Please enter your full name.');return;}
+    if(!formData.senderAddr.trim()){alert('Please enter your street address.');return;}
+    if(!formData.senderCity.trim()){alert('Please enter your city.');return;}
+    if(!formData.senderState.trim()){alert('Please enter your state/province.');return;}
+    if(!formData.senderZip.trim()){alert('Please enter your ZIP/postal code.');return;}
+    if(!formData.senderEmail.trim()){alert('Please enter your email address.');return;}
   }
-  if (step === 3) {
-    if (!formData.recName.trim()) { alert('Please enter the recipient name or company.'); return; }
-    if (!formData.recAddr.trim()) { alert('Please enter the recipient street address.'); return; }
-    if (!formData.recCity.trim()) { alert('Please enter the recipient city.'); return; }
+  if(step===3){
+    if(!formData.recName.trim()){alert('Please enter the recipient name.');return;}
+    if(!formData.recAddr.trim()){alert('Please enter the recipient address.');return;}
+    if(!formData.recCity.trim()){alert('Please enter the recipient city.');return;}
   }
-  if (step === 4) {
-    if (!formData.dispute.trim()) { alert('Please describe your dispute.'); return; }
-    if (!formData.amount) { alert('Please enter the amount demanded.'); return; }
-  }
-  if (step === 5 && !formData.resolution) { alert('Please select a preferred resolution.'); return; }
-  if (step === 6) {
-    if (!formData.country) { alert('Please select your country.'); return; }
-    if (!formData.language) { alert('Please select a letter language.'); return; }
-  }
-  if (step === 7 && !formData.tone) { alert('Please select a letter tone.'); return; }
-  if (step === totalSteps) { generateLetter(); return; }
-  step++;
-  renderStep();
+  if(step===4){if(!formData.dispute.trim()){alert('Please describe your dispute.');return;}if(!formData.amount){alert('Please enter the amount demanded.');return;}}
+  if(step===5&&!formData.resolution){alert('Please select a preferred resolution.');return;}
+  if(step===6){if(!formData.country){alert('Please select your country.');return;}}
+  if(step===7&&!formData.tone){alert('Please select a letter tone.');return;}
+  if(step===totalSteps){generateLetter();return;}
+  step++; renderStep();
 }
-
-function prevStep() {
-  if (step > 1) { step--; renderStep(); }
-}
+function prevStep(){ if(step>1){step--;renderStep();} }
 
 /* ── POST-GENERATION UI ────────────────────────────────────────── */
-function revealPostGenerationUI() {
-  document.getElementById('letter-actions-wrap').style.display = 'flex';
-  document.getElementById('disc-bar').style.display = 'flex';
-  const fn = document.getElementById('panel-foot-note');
-  if (fn) fn.innerHTML = '<span class="warn-s">✓</span> Letter generated successfully';
+function revealPostGenerationUI(){
+  document.getElementById('letter-actions-wrap').style.display='flex';
+  document.getElementById('disc-bar').style.display='flex';
+  const fn=document.getElementById('panel-foot-note');
+  if(fn) fn.innerHTML='<span class="warn-s">✓</span> Letter generated successfully';
 }
 
 /* ── LETTER GENERATION ─────────────────────────────────────────── */
-async function generateLetter() {
-  if (!formData.type) {
-    alert("Please select a letter type first.");
-    return;
-  }
+async function generateLetter(){
+  if(!formData.type){alert("Please select a letter type first.");return;}
+  isEditing=false;
+  const editBtn=document.getElementById('edit-btn');
+  if(editBtn) editBtn.textContent='✏ Edit';
+  document.getElementById('ai-spinner').style.display='flex';
+  document.getElementById('letter-preview-wrap').style.display='none';
 
-  isEditing = false;
-  const editBtn = document.getElementById('edit-btn');
-  if (editBtn) editBtn.textContent = '✏ Edit';
+  const law=COUNTRY_LAWS[formData.country]||'applicable civil law';
+  const senderCityLine=[formData.senderCity,formData.senderState,formData.senderZip].filter(Boolean).join(', ');
+  const recCityLine=[formData.recCity,formData.recState,formData.recZip].filter(Boolean).join(', ');
+  const todayDate=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
 
-  document.getElementById('ai-spinner').style.display = 'flex';
-  document.getElementById('letter-preview-wrap').style.display = 'none';
+  const prompt=`Generate a formal demand letter using EXACTLY this structure (no markdown except **bold** for the four detail labels):
 
-  const law = COUNTRY_LAWS[formData.country] || 'applicable civil law';
-
-  const senderCityLine = [formData.senderCity, formData.senderState, formData.senderZip].filter(Boolean).join(', ');
-  const recCityLine    = [formData.recCity, formData.recState, formData.recZip].filter(Boolean).join(', ');
-  const todayDate      = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-
-  const prompt = `Generate a formal demand letter using EXACTLY this structure and format (no markdown except **bold** for the four detail labels):
-
-${formData.senderName || '[Your Name]'}
-${formData.senderAddr || '[Your Address]'}
-${senderCityLine || '[City, State, Zip Code]'}
-${formData.senderEmail || '[Email Address]'}
-${formData.senderPhone || '[Phone Number]'}
+${formData.senderName||'[Your Name]'}
+${formData.senderAddr||'[Your Address]'}
+${senderCityLine||'[City, State, Zip Code]'}
+${formData.senderEmail||'[Email Address]'}
+${formData.senderPhone||'[Phone Number]'}
 ${todayDate}
 
-${formData.recName || "[Recipient's Name]"}
-${formData.recAddr || "[Recipient's Address]"}
-${recCityLine || '[City, State, Zip Code]'}
+${formData.recName||"[Recipient's Name]"}
+${formData.recAddr||"[Recipient's Address]"}
+${recCityLine||'[City, State, Zip Code]'}
 
-Subject: ${TYPE_RE[formData.type] || 'Demand for Compensation'}
+Subject: ${TYPE_RE[formData.type]||'Demand for Compensation'}
 
-Dear ${formData.recName || "[Recipient's Name]"},
+Dear ${formData.recName||"[Recipient's Name]"},
 
-[Opening paragraph: formally state you are demanding compensation for: ${formData.dispute || 'the incident'}. Mention prior contact attempts were unsuccessful. Tone: ${formData.tone}. Reference ${law} where relevant.]
+[Opening paragraph formally demanding compensation for: ${formData.dispute||'the incident'}. Tone: ${formData.tone}. Reference ${law}.]
 
 The details of the incident or issue are as follows:
 
-**Date of Incident/Issue:** [date of incident]
+**Date of Incident/Issue:** [date]
 
-**Description of Incident/Issue:** ${formData.dispute || '[describe the incident]'}
+**Description of Incident/Issue:** ${formData.dispute||'[describe]'}
 
-**Damages Sustained:** [describe damages — property, financial, personal injury etc.]
+**Damages Sustained:** [describe damages]
 
-**Total Amount of Compensation Demanded:** ${formData.currency || '$'}${formData.amount || '[amount]'}
+**Total Amount of Compensation Demanded:** ${formData.currency||'$'}${formData.amount||'[amount]'}
 
-[Paragraph demanding payment of ${formData.currency || '$'}${formData.amount || '[amount]'} within ${formData.deadline || '15'} days, warning of legal action if not received, citing ${law}.]
+[Paragraph demanding payment within ${formData.deadline||'15'} days, warning of legal action, citing ${law}.]
 
-[Closing paragraph reserving all rights. Professional sign-off.]
+[Closing paragraph reserving all rights.]
 
 Sincerely,
 
 
-${formData.senderName || '[Your Name]'}
-${formData.senderAddr || '[Your Address]'}
-${senderCityLine || '[City, State, Zip Code]'}
-${formData.senderEmail || '[Email Address]'}
-${formData.senderPhone || '[Phone Number]'}
+${formData.senderName||'[Your Name]'}
+${formData.senderAddr||'[Your Address]'}
+${senderCityLine||'[City, State, Zip Code]'}
+${formData.senderEmail||'[Email Address]'}
+${formData.senderPhone||'[Phone Number]'}
 
-Output ONLY the letter text. No commentary. No markdown except **bold** for the four detail labels above.`;
+Output ONLY the letter text. No commentary. No markdown except **bold** for the four detail labels.`;
 
   try {
-    const response = await fetch('/api/generate-letter', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        messages: [
-          { 
-            role: "system", 
-            content: "You are a professional legal document writer. Generate formal, legally-sound demand letters. Output only the letter text — no commentary, no preamble, no markdown formatting." 
-          },
-          { role: "user", content: prompt }
+    const response=await fetch('/api/generate-letter',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        messages:[
+          {role:"system",content:"You are a professional legal document writer. Generate formal demand letters. Output only the letter text."},
+          {role:"user",content:prompt}
         ],
-        model: "llama-3.3-70b-versatile",
-        max_tokens: 1500,
-        temperature: 0.7
+        model:"llama-3.3-70b-versatile",
+        max_tokens:1500,
+        temperature:0.7
       })
     });
-
-    const data = await response.json();
-
-    let letterText = '';
-    if (data.choices && data.choices[0] && data.choices[0].message) {
-      letterText = data.choices[0].message.content.trim();
-    } else {
-      letterText = buildSampleLetter();
-    }
-
-    document.getElementById('letter-doc').innerHTML = renderLetterHTML(letterText);
-
-    letterGenerated = true;
-    revealPostGenerationUI();
-
-  } catch (e) {
+    const data=await response.json();
+    let letterText='';
+    if(data.choices&&data.choices[0]&&data.choices[0].message){
+      letterText=data.choices[0].message.content.trim();
+    } else { letterText=buildSampleLetter(); }
+    document.getElementById('letter-doc').innerHTML=renderLetterHTML(letterText);
+    letterGenerated=true; revealPostGenerationUI();
+  } catch(e){
     console.error(e);
-    alert("Failed to connect to AI. Showing sample instead.");
-    const sample = buildSampleLetter();
-    document.getElementById('letter-doc').innerHTML = renderLetterHTML(sample);
-    letterGenerated = true;
-    revealPostGenerationUI();
+    const sample=buildSampleLetter();
+    document.getElementById('letter-doc').innerHTML=renderLetterHTML(sample);
+    letterGenerated=true; revealPostGenerationUI();
   }
-
-  document.getElementById('ai-spinner').style.display = 'none';
-  document.getElementById('letter-preview-wrap').style.display = 'block';
+  document.getElementById('ai-spinner').style.display='none';
+  document.getElementById('letter-preview-wrap').style.display='block';
 }
 
-function buildSampleLetter() {
-  const d = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  const law = COUNTRY_LAWS[formData.country] || 'applicable civil law';
-  const senderCity = [formData.senderCity, formData.senderState, formData.senderZip].filter(Boolean).join(', ');
-  const recCity    = [formData.recCity, formData.recState, formData.recZip].filter(Boolean).join(', ');
-  return `${formData.senderName || '[Your Name]'}
-${formData.senderAddr || '[Your Address]'}
-${senderCity || '[City, State, Zip Code]'}
-${formData.senderEmail || '[Email Address]'}
-${formData.senderPhone || '[Phone Number]'}
+function buildSampleLetter(){
+  const d=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  const law=COUNTRY_LAWS[formData.country]||'applicable civil law';
+  const sc=[formData.senderCity,formData.senderState,formData.senderZip].filter(Boolean).join(', ');
+  const rc=[formData.recCity,formData.recState,formData.recZip].filter(Boolean).join(', ');
+  return `${formData.senderName||'[Your Name]'}
+${formData.senderAddr||'[Your Address]'}
+${sc||'[City, State, Zip Code]'}
+${formData.senderEmail||'[Email Address]'}
+${formData.senderPhone||'[Phone Number]'}
 ${d}
 
-${formData.recName || "[Recipient's Name]"}
-${formData.recAddr || "[Recipient's Address]"}
-${recCity || '[City, State, Zip Code]'}
+${formData.recName||"[Recipient's Name]"}
+${formData.recAddr||"[Recipient's Address]"}
+${rc||'[City, State, Zip Code]'}
 
-Subject: ${TYPE_RE[formData.type] || 'Demand for Compensation'}
+Subject: ${TYPE_RE[formData.type]||'Demand for Compensation'}
 
-Dear ${formData.recName || '[Recipient\'s Name]'},
+Dear ${formData.recName||"[Recipient's Name]"},
 
-I am writing this letter to formally demand compensation for damages sustained due to ${formData.dispute || '[incident or issue, e.g., a car accident, breach of contract, or defective product]'}. Despite my previous attempts to contact you and resolve this matter amicably, I have not received an adequate response or an offer for a fair settlement.
+I am writing this letter to formally demand compensation for damages sustained due to ${formData.dispute||'[incident or issue]'}. Despite my previous attempts to contact you and resolve this matter amicably, I have not received an adequate response or an offer for a fair settlement.
 
 The details of the incident or issue are as follows:
 
-**Date of Incident/Issue:** ${formData.incidentDate || '[Date when the incident occurred or when the issue was discovered]'}
+**Date of Incident/Issue:** ${formData.incidentDate||'[Date of incident]'}
 
-**Description of Incident/Issue:** ${formData.dispute || '[Briefly describe the incident or issue, e.g., the other party\'s car collided with yours, the contractor failed to complete the project as agreed, or the product malfunctioned and caused injury]'}
+**Description of Incident/Issue:** ${formData.dispute||'[Describe the incident]'}
 
-**Damages Sustained:** ${formData.damages || '[List the damages sustained, e.g., property damage, personal injury, or financial loss]'}
+**Damages Sustained:** [Property damage, personal injury, or financial loss]
 
-**Total Amount of Compensation Demanded:** ${formData.currency || '$'}${formData.amount || '[Amount Demanded]'}
+**Total Amount of Compensation Demanded:** ${formData.currency||'$'}${formData.amount||'[Amount]'}
 
-In light of the above, I am demanding compensation in the amount of ${formData.currency || '$'}${formData.amount || '[Amount Demanded]'} to cover the damages sustained as a result of the incident or issue. I kindly request that you respond to this demand letter within ${formData.deadline || '15'} days from the date it was received. If I do not hear from you or receive an acceptable settlement offer within the specified time frame, I will be forced to consider further legal action to recover the compensation owed, pursuant to ${law}.
+In light of the above, I am demanding compensation in the amount of ${formData.currency||'$'}${formData.amount||'[Amount]'} within ${formData.deadline||'15'} days from the date this letter was received. If I do not hear from you within the specified time frame, I will be forced to consider further legal action pursuant to ${law}.
 
 This letter is written without prejudice to any and all rights and remedies available to me, all of which are expressly reserved.
 
 Sincerely,
 
 
-${formData.senderName || '[Your Name]'}
-${formData.senderAddr || '[Your Address]'}
-${senderCity || '[City, State, Zip Code]'}
-${formData.senderEmail || '[Email Address]'}
-${formData.senderPhone || '[Phone Number]'}`;
+${formData.senderName||'[Your Name]'}
+${formData.senderAddr||'[Your Address]'}
+${sc||'[City, State, Zip Code]'}
+${formData.senderEmail||'[Email Address]'}
+${formData.senderPhone||'[Phone Number]'}`;
 }
 
-/* ── LETTER RENDERER ────────────────────────────────────────────── */
-function renderLetterHTML(text) {
-  const s = `font-family:'Times New Roman',Georgia,serif;font-size:12.5pt;line-height:1.75;color:#111827;`;
-  const wrap = `background:white;padding:52px 60px;`;
-
-  // Split into lines for structured rendering
-  const lines = text.split('\n');
-  let html = '';
-  let i = 0;
-
-  // Helper to render a plain paragraph with no indent (address/header lines)
-  function headerLine(line) {
-    return `<p style="${s}margin:0;padding:0;">${escHtml(line)}</p>`;
-  }
-  // Body paragraph with justified text
-  function bodyPara(line) {
-    // Handle bold labels like **Label:** text
-    const boldified = line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    return `<p style="${s}margin-bottom:1rem;text-align:justify;">${boldified}</p>`;
-  }
-
-  // Collect sender block (first non-empty lines until a blank line)
-  let senderLines = [];
-  while (i < lines.length && lines[i].trim() !== '') {
-    senderLines.push(lines[i]);
-    i++;
-  }
-  if (senderLines.length) {
-    html += `<div style="margin-bottom:1.4rem;">` + senderLines.map(headerLine).join('') + `</div>`;
-  }
-  // Skip blank line(s)
-  while (i < lines.length && lines[i].trim() === '') i++;
-
-  // Date line (single line)
-  if (i < lines.length && lines[i].trim() !== '') {
-    html += `<p style="${s}margin-bottom:1.4rem;">${escHtml(lines[i].trim())}</p>`;
-    i++;
-  }
-  while (i < lines.length && lines[i].trim() === '') i++;
-
+function renderLetterHTML(text){
+  const s=`font-family:'Times New Roman',Georgia,serif;font-size:12.5pt;line-height:1.75;color:#111827;`;
+  const lines=text.split('\n');
+  let html='',i=0;
+  function hLine(line){ return `<p style="${s}margin:0;padding:0;">${escHtml(line)}</p>`; }
+  // Sender block
+  let sLines=[];
+  while(i<lines.length&&lines[i].trim()!==''){sLines.push(lines[i]);i++;}
+  if(sLines.length) html+=`<div style="margin-bottom:1.4rem;">`+sLines.map(hLine).join('')+`</div>`;
+  while(i<lines.length&&lines[i].trim()==='')i++;
+  // Date
+  if(i<lines.length&&lines[i].trim()!==''){html+=`<p style="${s}margin-bottom:1.4rem;">${escHtml(lines[i].trim())}</p>`;i++;}
+  while(i<lines.length&&lines[i].trim()==='')i++;
   // Recipient block
-  let recLines = [];
-  while (i < lines.length && lines[i].trim() !== '') {
-    recLines.push(lines[i]);
-    i++;
+  let rLines=[];
+  while(i<lines.length&&lines[i].trim()!==''){rLines.push(lines[i]);i++;}
+  if(rLines.length) html+=`<div style="margin-bottom:1.4rem;">`+rLines.map(hLine).join('')+`</div>`;
+  while(i<lines.length&&lines[i].trim()==='')i++;
+  // Subject
+  if(i<lines.length&&lines[i].trim().toLowerCase().startsWith('subject:')){
+    html+=`<p style="${s}margin-bottom:1.4rem;font-weight:bold;">${escHtml(lines[i].trim())}</p>`;i++;
   }
-  if (recLines.length) {
-    html += `<div style="margin-bottom:1.4rem;">` + recLines.map(headerLine).join('') + `</div>`;
-  }
-  while (i < lines.length && lines[i].trim() === '') i++;
-
-  // Subject line
-  if (i < lines.length && lines[i].trim().toLowerCase().startsWith('subject:')) {
-    const subjectText = lines[i].trim();
-    html += `<p style="${s}margin-bottom:1.4rem;font-weight:bold;">${escHtml(subjectText)}</p>`;
-    i++;
-  }
-  while (i < lines.length && lines[i].trim() === '') i++;
-
-  // Rest: salutation + body paragraphs grouped by blank lines
-  while (i < lines.length) {
-    let block = [];
-    while (i < lines.length && lines[i].trim() !== '') {
-      block.push(lines[i]);
-      i++;
+  while(i<lines.length&&lines[i].trim()==='')i++;
+  // Body
+  while(i<lines.length){
+    let block=[];
+    while(i<lines.length&&lines[i].trim()!==''){block.push(lines[i]);i++;}
+    if(block.length){
+      const combined=block.join(' ').trim();
+      const boldified=combined.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+      html+=`<p style="${s}margin-bottom:1rem;text-align:justify;">${boldified}</p>`;
     }
-    if (block.length) {
-      const combined = block.join(' ').trim();
-      // Bold labels (lines starting with **)
-      const boldified = combined.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-      html += `<p style="${s}margin-bottom:1rem;text-align:justify;">${boldified}</p>`;
-    }
-    // Skip blank lines
-    while (i < lines.length && lines[i].trim() === '') i++;
+    while(i<lines.length&&lines[i].trim()==='')i++;
   }
-
-  return `<div style="${wrap}">${html}</div>`;
+  return `<div style="background:white;padding:52px 60px;">${html}</div>`;
 }
 
 /* ── LETTER ACTIONS ────────────────────────────────────────────── */
-function editLetter() {
-  if (!letterGenerated) { alert('Generate a letter first.'); return; }
-  const doc = document.getElementById('letter-doc');
-  const editBtn = document.getElementById('edit-btn');
-  if (!isEditing) {
-    const txt = getLetterText();
-    if (txt === null) return;
-    doc.innerHTML = `<textarea id="edit-area" style="width:100%;min-height:420px;background:rgba(10,18,35,0.9);border:1px solid var(--gold);border-radius:6px;padding:1rem;color:#aab8d0;font-family:'Courier New',monospace;font-size:0.76rem;line-height:1.75;resize:vertical;outline:none;box-sizing:border-box">${escHtml(txt)}</textarea>`;
-    editBtn.textContent = '✓ Save';
-    isEditing = true;
+function editLetter(){
+  if(!letterGenerated){alert('Generate a letter first.');return;}
+  const doc=document.getElementById('letter-doc');
+  const editBtn=document.getElementById('edit-btn');
+  if(!isEditing){
+    const txt=getLetterText(); if(txt===null) return;
+    doc.innerHTML=`<textarea id="edit-area" style="width:100%;min-height:420px;background:rgba(10,18,35,0.9);border:1px solid var(--gold);border-radius:6px;padding:1rem;color:#aab8d0;font-family:'Courier New',monospace;font-size:0.76rem;line-height:1.75;resize:vertical;outline:none;box-sizing:border-box">${escHtml(txt)}</textarea>`;
+    editBtn.textContent='✓ Save'; isEditing=true;
   } else {
-    const area = document.getElementById('edit-area');
-    const txt = area.value;
-    doc.innerHTML = renderLetterHTML(txt);
-    editBtn.textContent = '✏ Edit';
-    isEditing = false;
+    const area=document.getElementById('edit-area');
+    doc.innerHTML=renderLetterHTML(area.value);
+    editBtn.textContent='✏ Edit'; isEditing=false;
   }
 }
 
-function copyLetter() {
-  if (!letterGenerated) { alert('Generate a letter first.'); return; }
-  if (isEditing) editLetter();
-  const txt = getLetterText();
-  if (!txt) { alert('No letter content to copy.'); return; }
-  const btn = document.getElementById('copy-btn');
-  navigator.clipboard.writeText(txt).then(() => {
-    btn.textContent = '✓ Copied!';
-    btn.style.borderColor = 'var(--green)';
-    btn.style.color = 'var(--green)';
-    setTimeout(() => {
-      btn.textContent = '⬡ Copy';
-      btn.style.borderColor = '';
-      btn.style.color = '';
-    }, 2000);
-  }).catch(() => {
-    const ta = document.createElement('textarea');
-    ta.value = txt;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
-    btn.textContent = '✓ Copied!';
-    setTimeout(() => { btn.textContent = '⬡ Copy'; }, 2000);
+function copyLetter(){
+  if(!letterGenerated){alert('Generate a letter first.');return;}
+  if(isEditing) editLetter();
+  const txt=getLetterText();
+  if(!txt){alert('No letter content to copy.');return;}
+  const btn=document.getElementById('copy-btn');
+  navigator.clipboard.writeText(txt).then(()=>{
+    btn.textContent='✓ Copied!'; btn.style.borderColor='var(--green)'; btn.style.color='var(--green)';
+    setTimeout(()=>{btn.textContent='⬡ Copy';btn.style.borderColor='';btn.style.color='';},2000);
+  }).catch(()=>{
+    const ta=document.createElement('textarea'); ta.value=txt;
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    btn.textContent='✓ Copied!'; setTimeout(()=>{btn.textContent='⬡ Copy';},2000);
   });
 }
 
-function downloadPDF() {
-  let letterContent = document.getElementById('letter-doc');
-
-  if (!letterContent || letterContent.innerHTML.trim().length < 100) {
-    alert("No letter generated yet. Please generate a letter first.");
-    return;
-  }
-
-  const originalTitle = document.title;
-  document.title = "Demand_Letter_" + (formData?.type || "Legal");
-
+function downloadPDF(){
+  const lc=document.getElementById('letter-doc');
+  if(!lc||lc.innerHTML.trim().length<100){alert("No letter generated yet.");return;}
+  const orig=document.title;
+  document.title="Demand_Letter_"+(formData?.type||"Legal");
   window.print();
-
-  document.title = originalTitle;
+  document.title=orig;
 }
 
-async function emailLetter() {
-  if (!letterGenerated) {
-    alert('Please generate a letter first.');
-    return;
-  }
-
-  if (!isLoggedIn) {
-    alert('Please log in first to send emails professionally.');
-    openLogin();
-    return;
-  }
-
-  const recipient = prompt("Enter recipient's email address:", formData.recEmail || '');
-  if (!recipient || !recipient.includes('@')) {
-    alert("Please enter a valid recipient email.");
-    return;
-  }
-
-  const letterText = getLetterText();
-  if (!letterText) {
-    alert("No letter content available.");
-    return;
-  }
-
-  const subject = `Formal Demand Letter - ${TYPE_LABELS[formData.type] || 'Legal Matter'}`;
-
+async function emailLetter(){
+  if(!letterGenerated){alert('Please generate a letter first.');return;}
+  if(!isLoggedIn){alert('Please log in first to send emails.');openLogin();return;}
+  const recipient=prompt("Enter recipient's email address:",formData.recEmail||'');
+  if(!recipient||!recipient.includes('@')){alert("Please enter a valid email.");return;}
+  const letterText=getLetterText();
+  if(!letterText){alert("No letter content available.");return;}
+  const subject=`Formal Demand Letter - ${TYPE_LABELS[formData.type]||'Legal Matter'}`;
   try {
-    let userEmail = "noreply@sueletter.com";
-    if (auth0Client && currentUser) {
-      userEmail = currentUser.email;
-    }
-
-    const response = await fetch('/api/send-email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        to: recipient,
-        subject: subject,
-        letterText: letterText,
-        userEmail: userEmail
-      })
+    const userEmail=currentUser?currentUser.email:"noreply@sueletter.com";
+    const response=await fetch('/api/send-email',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({to:recipient,subject:subject,letterText:letterText,userEmail:userEmail})
     });
-
-    const result = await response.json();
-
-    if (result.success) {
-      alert(`✅ Email sent successfully to ${recipient}\n\nFrom: ${userEmail}`);
-    } else {
-      alert("Failed to send email: " + (result.error || 'Unknown error'));
-    }
-  } catch (e) {
-    console.error(e);
-    alert("Error sending email. Please try again.");
-  }
+    const result=await response.json();
+    if(result.success){alert(`✅ Email sent to ${recipient}`);}
+    else{alert("Failed to send email: "+(result.error||'Unknown error'));}
+  } catch(e){console.error(e);alert("Error sending email.");}
 }
 
-// Initialize on page load
+// ✅ Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
   initAuth0();
   showPage('home');
 });
 </script>
 
-<!-- AUTH0 SDK - UPDATED VERSION -->
-<script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
-
 </body>
 </html>
-

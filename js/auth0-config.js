@@ -7,7 +7,7 @@ async function initAuth0() {
             authorizationParams: {
                 redirect_uri: window.location.origin + "/index.html",
                 response_type: "code",
-                scope: "openid profile email"     // Removed audience
+                scope: "openid profile email"
             },
 
             cacheLocation: "localstorage",

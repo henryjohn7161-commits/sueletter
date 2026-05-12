@@ -569,7 +569,7 @@ nav{
 
 <!-- NAVIGATION -->
 <nav>
-  <div class="logo">Sue<span>Letter</span></div>
+  <button class="logo" onclick="showPage('home')" style="background:none;border:none;cursor:pointer;padding:0;font-family:var(--font-display);font-size:1.4rem;font-weight:700;color:var(--white);letter-spacing:0.5px;transition:color 0.15s">Sue<span>Letter</span></button>
   <div class="nav-r">
     <button class="nav-link" onclick="showPage('home')">Home</button>
     <button class="nav-link" onclick="showPage('generator');renderStep()">Generator</button>
@@ -784,21 +784,20 @@ let currentUser = null;
 // CRITICAL FIX: Initialize Auth0 on page load with proper error handling
 async function initAuth0() {
   try {
-    // Wait for Auth0 SDK to be available (check for window.auth0)
+    // Wait for Auth0 SDK to be available
     let attempts = 0;
-    while (typeof window.auth0 === 'undefined' && attempts < 50) {
+    while (typeof Auth0Client === 'undefined' && attempts < 50) {
       await new Promise(r => setTimeout(r, 100));
       attempts++;
     }
 
-    if (typeof window.auth0 === 'undefined') {
+    if (typeof Auth0Client === 'undefined') {
       console.error('❌ Auth0 SDK failed to load after 5 seconds');
-      console.error('Make sure Auth0 script is loaded: <script src="https://cdn.auth0.com/js/auth0-spa-js/1.22/auth0-spa-js.production.js"></script>');
       return;
     }
 
-    // Create Auth0 client using the correct global
-    auth0Client = await window.auth0.createAuth0Client({
+    // Create Auth0 client
+    auth0Client = new Auth0Client({
       domain: 'dev-ej7oma8mgej73zwb.eu.auth0.com',
       clientId: 'bV9k1JybdoaIGE8MSCWerNw1dxzN2rHZ',
       authorizationParams: {
@@ -808,7 +807,7 @@ async function initAuth0() {
       }
     });
 
-    console.log('✅ Auth0 Client initialized successfully');
+    console.log('✅ Auth0 Client initialized');
 
     // Handle redirect callback
     const query = window.location.search;
@@ -825,13 +824,12 @@ async function initAuth0() {
       console.log('✅ User logged in:', currentUser.email);
       updateUIAfterLogin();
     } else {
-      console.log('ℹ️ User not logged in');
+      console.log('User not logged in');
       updateUIBeforeLogin();
     }
 
   } catch (err) {
     console.error('❌ Auth0 initialization error:', err);
-    console.error('Error details:', err.message);
   }
 }
 
@@ -1391,18 +1389,53 @@ async function generateLetter() {
 
   const law = COUNTRY_LAWS[formData.country] || 'applicable civil law';
 
-  const prompt = `You are a professional legal document AI. Generate a complete, formal demand letter.
-Letter type: ${TYPE_LABELS[formData.type] || 'General Demand'}.
-Sender: ${formData.senderName || '[Sender]'}, ${formData.senderAddr}, ${formData.senderCity} ${formData.senderState} ${formData.senderZip}.
-Recipient: ${formData.recName || '[Recipient]'}, ${formData.recAddr}.
-Dispute: ${formData.dispute || '[As described]'}.
-Amount: ${formData.currency} ${formData.amount}.
-Deadline: ${formData.deadline} days.
-Resolution: ${formData.resolution}.
-Country: ${formData.country} — cite relevant laws (${law}).
-Tone: ${formData.tone}.
-Prior contact: ${formData.prior ? 'Yes, prior contact was made.' : 'No prior contact.'}.
-Write a professional 4-6 paragraph letter. Start directly with sender name/address block.`;
+  const senderCityLine = [formData.senderCity, formData.senderState, formData.senderZip].filter(Boolean).join(', ');
+  const recCityLine    = [formData.recCity, formData.recState, formData.recZip].filter(Boolean).join(', ');
+  const todayDate      = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  const prompt = `Generate a formal demand letter using EXACTLY this structure and format (no markdown except **bold** for the four detail labels):
+
+${formData.senderName || '[Your Name]'}
+${formData.senderAddr || '[Your Address]'}
+${senderCityLine || '[City, State, Zip Code]'}
+${formData.senderEmail || '[Email Address]'}
+${formData.senderPhone || '[Phone Number]'}
+${todayDate}
+
+${formData.recName || "[Recipient's Name]"}
+${formData.recAddr || "[Recipient's Address]"}
+${recCityLine || '[City, State, Zip Code]'}
+
+Subject: ${TYPE_RE[formData.type] || 'Demand for Compensation'}
+
+Dear ${formData.recName || "[Recipient's Name]"},
+
+[Opening paragraph: formally state you are demanding compensation for: ${formData.dispute || 'the incident'}. Mention prior contact attempts were unsuccessful. Tone: ${formData.tone}. Reference ${law} where relevant.]
+
+The details of the incident or issue are as follows:
+
+**Date of Incident/Issue:** [date of incident]
+
+**Description of Incident/Issue:** ${formData.dispute || '[describe the incident]'}
+
+**Damages Sustained:** [describe damages — property, financial, personal injury etc.]
+
+**Total Amount of Compensation Demanded:** ${formData.currency || '$'}${formData.amount || '[amount]'}
+
+[Paragraph demanding payment of ${formData.currency || '$'}${formData.amount || '[amount]'} within ${formData.deadline || '15'} days, warning of legal action if not received, citing ${law}.]
+
+[Closing paragraph reserving all rights. Professional sign-off.]
+
+Sincerely,
+
+
+${formData.senderName || '[Your Name]'}
+${formData.senderAddr || '[Your Address]'}
+${senderCityLine || '[City, State, Zip Code]'}
+${formData.senderEmail || '[Email Address]'}
+${formData.senderPhone || '[Phone Number]'}
+
+Output ONLY the letter text. No commentary. No markdown except **bold** for the four detail labels above.`;
 
   try {
     const response = await fetch('/api/generate-letter', {
@@ -1431,11 +1464,7 @@ Write a professional 4-6 paragraph letter. Start directly with sender name/addre
       letterText = buildSampleLetter();
     }
 
-    document.getElementById('letter-doc').innerHTML = `
-      <div style="font-family: 'Times New Roman', Georgia, serif; font-size: 13.5pt; line-height: 1.85; color: #111827; padding: 55px 60px; background: white; text-align: justify;">
-        ${letterText.replace(/\n/g, '<br><br>')}
-      </div>
-    `;
+    document.getElementById('letter-doc').innerHTML = renderLetterHTML(letterText);
 
     letterGenerated = true;
     revealPostGenerationUI();
@@ -1444,11 +1473,7 @@ Write a professional 4-6 paragraph letter. Start directly with sender name/addre
     console.error(e);
     alert("Failed to connect to AI. Showing sample instead.");
     const sample = buildSampleLetter();
-    document.getElementById('letter-doc').innerHTML = `
-      <div style="font-family: 'Times New Roman', Georgia, serif; font-size: 13.5pt; line-height: 1.85; color: #111827; padding: 55px 60px; background: white; text-align: justify;">
-        ${sample.replace(/\n/g, '<br><br>')}
-      </div>
-    `;
+    document.getElementById('letter-doc').innerHTML = renderLetterHTML(sample);
     letterGenerated = true;
     revealPostGenerationUI();
   }
@@ -1460,37 +1485,126 @@ Write a professional 4-6 paragraph letter. Start directly with sender name/addre
 function buildSampleLetter() {
   const d = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   const law = COUNTRY_LAWS[formData.country] || 'applicable civil law';
+  const senderCity = [formData.senderCity, formData.senderState, formData.senderZip].filter(Boolean).join(', ');
+  const recCity    = [formData.recCity, formData.recState, formData.recZip].filter(Boolean).join(', ');
   return `${formData.senderName || '[Your Name]'}
 ${formData.senderAddr || '[Your Address]'}
-${[formData.senderCity, formData.senderState, formData.senderZip].filter(Boolean).join(', ')}
-${[formData.senderEmail, formData.senderPhone].filter(Boolean).join(' · ')}
-
+${senderCity || '[City, State, Zip Code]'}
+${formData.senderEmail || '[Email Address]'}
+${formData.senderPhone || '[Phone Number]'}
 ${d}
 
-${formData.recName || '[Recipient Name]'}
-${formData.recAddr || '[Recipient Address]'}
-${[formData.recCity, formData.recState, formData.recZip].filter(Boolean).join(', ')}
+${formData.recName || "[Recipient's Name]"}
+${formData.recAddr || "[Recipient's Address]"}
+${recCity || '[City, State, Zip Code]'}
 
-RE: ${TYPE_RE[formData.type] || 'FORMAL DEMAND LETTER'}
+Subject: ${TYPE_RE[formData.type] || 'Demand for Compensation'}
 
-Dear ${formData.recName || 'Sir/Madam'},
+Dear ${formData.recName || '[Recipient\'s Name]'},
 
-I am writing to formally notify you of a serious matter requiring your immediate attention and response. This letter constitutes an official demand pursuant to ${law}, and serves as your final opportunity to resolve this dispute without resort to litigation.
+I am writing this letter to formally demand compensation for damages sustained due to ${formData.dispute || '[incident or issue, e.g., a car accident, breach of contract, or defective product]'}. Despite my previous attempts to contact you and resolve this matter amicably, I have not received an adequate response or an offer for a fair settlement.
 
-${formData.dispute || 'The facts giving rise to this demand are as follows: You have failed to fulfill your legal and contractual obligations owed to the undersigned, causing significant harm and financial damages that require immediate remediation.'}
+The details of the incident or issue are as follows:
 
-Pursuant to my rights under ${law}, I hereby formally demand that you: (1) ${formData.resolution || 'immediately fulfill your legal obligations'}; and (2) provide written confirmation of your compliance within the specified response period. The total sum demanded is ${formData.currency} ${formData.amount}.
+**Date of Incident/Issue:** ${formData.incidentDate || '[Date when the incident occurred or when the issue was discovered]'}
 
-You are hereby given ${formData.deadline} days from the date of this letter to respond in full. Failure to comply within this timeframe will leave me with no alternative but to pursue all available legal remedies, including filing a civil action in the appropriate court, seeking compensatory and consequential damages, legal costs, and attorney's fees to the fullest extent permitted by law.
+**Description of Incident/Issue:** ${formData.dispute || '[Briefly describe the incident or issue, e.g., the other party\'s car collided with yours, the contractor failed to complete the project as agreed, or the product malfunctioned and caused injury]'}
+
+**Damages Sustained:** ${formData.damages || '[List the damages sustained, e.g., property damage, personal injury, or financial loss]'}
+
+**Total Amount of Compensation Demanded:** ${formData.currency || '$'}${formData.amount || '[Amount Demanded]'}
+
+In light of the above, I am demanding compensation in the amount of ${formData.currency || '$'}${formData.amount || '[Amount Demanded]'} to cover the damages sustained as a result of the incident or issue. I kindly request that you respond to this demand letter within ${formData.deadline || '15'} days from the date it was received. If I do not hear from you or receive an acceptable settlement offer within the specified time frame, I will be forced to consider further legal action to recover the compensation owed, pursuant to ${law}.
 
 This letter is written without prejudice to any and all rights and remedies available to me, all of which are expressly reserved.
-
-Govern yourself accordingly.
 
 Sincerely,
 
 
-${formData.senderName || '[Your Name]'}`;
+${formData.senderName || '[Your Name]'}
+${formData.senderAddr || '[Your Address]'}
+${senderCity || '[City, State, Zip Code]'}
+${formData.senderEmail || '[Email Address]'}
+${formData.senderPhone || '[Phone Number]'}`;
+}
+
+/* ── LETTER RENDERER ────────────────────────────────────────────── */
+function renderLetterHTML(text) {
+  const s = `font-family:'Times New Roman',Georgia,serif;font-size:12.5pt;line-height:1.75;color:#111827;`;
+  const wrap = `background:white;padding:52px 60px;`;
+
+  // Split into lines for structured rendering
+  const lines = text.split('\n');
+  let html = '';
+  let i = 0;
+
+  // Helper to render a plain paragraph with no indent (address/header lines)
+  function headerLine(line) {
+    return `<p style="${s}margin:0;padding:0;">${escHtml(line)}</p>`;
+  }
+  // Body paragraph with justified text
+  function bodyPara(line) {
+    // Handle bold labels like **Label:** text
+    const boldified = line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    return `<p style="${s}margin-bottom:1rem;text-align:justify;">${boldified}</p>`;
+  }
+
+  // Collect sender block (first non-empty lines until a blank line)
+  let senderLines = [];
+  while (i < lines.length && lines[i].trim() !== '') {
+    senderLines.push(lines[i]);
+    i++;
+  }
+  if (senderLines.length) {
+    html += `<div style="margin-bottom:1.4rem;">` + senderLines.map(headerLine).join('') + `</div>`;
+  }
+  // Skip blank line(s)
+  while (i < lines.length && lines[i].trim() === '') i++;
+
+  // Date line (single line)
+  if (i < lines.length && lines[i].trim() !== '') {
+    html += `<p style="${s}margin-bottom:1.4rem;">${escHtml(lines[i].trim())}</p>`;
+    i++;
+  }
+  while (i < lines.length && lines[i].trim() === '') i++;
+
+  // Recipient block
+  let recLines = [];
+  while (i < lines.length && lines[i].trim() !== '') {
+    recLines.push(lines[i]);
+    i++;
+  }
+  if (recLines.length) {
+    html += `<div style="margin-bottom:1.4rem;">` + recLines.map(headerLine).join('') + `</div>`;
+  }
+  while (i < lines.length && lines[i].trim() === '') i++;
+
+  // Subject line
+  if (i < lines.length && lines[i].trim().toLowerCase().startsWith('subject:')) {
+    const subjectText = lines[i].trim();
+    html += `<p style="${s}margin-bottom:1.4rem;font-weight:bold;">${escHtml(subjectText)}</p>`;
+    i++;
+  }
+  while (i < lines.length && lines[i].trim() === '') i++;
+
+  // Rest: salutation + body paragraphs grouped by blank lines
+  while (i < lines.length) {
+    let block = [];
+    while (i < lines.length && lines[i].trim() !== '') {
+      block.push(lines[i]);
+      i++;
+    }
+    if (block.length) {
+      const combined = block.join(' ').trim();
+      // Bold labels (lines starting with **)
+      const boldified = combined.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      html += `<p style="${s}margin-bottom:1rem;text-align:justify;">${boldified}</p>`;
+    }
+    // Skip blank lines
+    while (i < lines.length && lines[i].trim() === '') i++;
+  }
+
+  return `<div style="${wrap}">${html}</div>`;
 }
 
 /* ── LETTER ACTIONS ────────────────────────────────────────────── */
@@ -1507,7 +1621,7 @@ function editLetter() {
   } else {
     const area = document.getElementById('edit-area');
     const txt = area.value;
-    doc.innerHTML = `<pre style="white-space:pre-wrap;font-family:'Courier New',monospace;font-size:0.76rem;line-height:1.75;color:#aab8d0">${escHtml(txt)}</pre>`;
+    doc.innerHTML = renderLetterHTML(txt);
     editBtn.textContent = '✏ Edit';
     isEditing = false;
   }

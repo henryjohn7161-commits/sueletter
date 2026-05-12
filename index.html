@@ -797,11 +797,11 @@ async function initAuth0() {
     }
 
     // Create Auth0 client
-auth0Client = new Auth0Client({
+auth0Client = await createAuth0Client({
   domain: 'dev-ej7oma8mgej73zwb.eu.auth0.com',
   clientId: 'bV9k1JybdoaIGE8MSCWerNw1dxzN2rHZ',
   authorizationParams: {
-    redirect_uri: window.location.origin,  // ← only change this line
+    redirect_uri: window.location.origin,
     audience: 'https://sueletter-api',
     scope: 'openid profile email'
   }
@@ -1733,8 +1733,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<!-- AUTH0 SDK - CRITICAL FIX -->
-<script src="https://cdn.auth0.com/js/auth0-spa-js/1.22/auth0-spa-js.production.js"></script>
+<!-- AUTH0 SDK - UPDATED VERSION -->
+<script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
 
 </body>
 </html>
+

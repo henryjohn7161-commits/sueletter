@@ -460,15 +460,48 @@ nav{
 <script>
 /* ==================== AUTH0 SETUP ==================== */
 let auth0Client = null;
+let auth0InitPromise = null;
+let auth0InitError = null;
 let isLoggedIn = false;
 let currentUser = null;
 
+function loadAuth0Sdk() {
+  if (window.auth0 && window.auth0.createAuth0Client) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve, reject) => {
+    const existing = document.querySelector('script[src*="auth0-spa-js"]');
+    if (existing) {
+      if (window.auth0 && window.auth0.createAuth0Client) {
+        resolve();
+        return;
+      }
+
+      existing.addEventListener('load', () => {
+        return window.auth0 && window.auth0.createAuth0Client ? resolve() : reject(new Error('Auth0 SDK loaded but did not export auth0.createAuth0Client'));
+      });
+      existing.addEventListener('error', () => reject(new Error('Auth0 SDK failed to load')));
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js';
+    script.onload = () => {
+      if (window.auth0 && window.auth0.createAuth0Client) {
+        resolve();
+      } else {
+        reject(new Error('Auth0 SDK loaded but did not export auth0.createAuth0Client'));
+      }
+    };
+    script.onerror = () => reject(new Error('Auth0 SDK failed to load'));
+    document.head.appendChild(script);
+  });
+}
+
 async function initAuth0() {
   try {
-    // ✅ The Auth0 SPA SDK exposes the global auth0 object in this bundle version.
-    if (!window.auth0 || !window.auth0.createAuth0Client) {
-      throw new Error('Auth0 SDK not loaded correctly.');
-    }
+    await loadAuth0Sdk();
 
     auth0Client = await auth0.createAuth0Client({
       domain: 'dev-ej7oma8mgej73zwb.eu.auth0.com',
@@ -499,6 +532,7 @@ async function initAuth0() {
     }
 
   } catch (err) {
+    auth0InitError = err;
     console.error('❌ Auth0 initialization error:', err);
   }
 }
@@ -527,10 +561,20 @@ function openLogin() { document.getElementById('login-overlay').classList.add('o
 function closeLogin() { document.getElementById('login-overlay').classList.remove('open'); }
 
 async function handleLogin(connection) {
+  if (auth0InitPromise) {
+    await auth0InitPromise;
+  }
+
+  if (auth0InitError) {
+    alert('Login service failed to initialize. Please refresh the page and try again.');
+    return;
+  }
+
   if (!auth0Client) {
     alert('Login service is still loading. Please wait a moment and try again.');
     return;
   }
+
   try {
     await auth0Client.loginWithRedirect({
       authorizationParams: {
@@ -1127,7 +1171,7 @@ async function emailLetter(){
 
 // ✅ Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
-  initAuth0();
+  auth0InitPromise = initAuth0();
   showPage('home');
 });
 </script>

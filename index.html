@@ -465,8 +465,12 @@ let currentUser = null;
 
 async function initAuth0() {
   try {
-    // ✅ createAuth0Client comes from the SDK loaded in <head>
-    auth0Client = await createAuth0Client({
+    // ✅ The Auth0 SPA SDK exposes the global auth0 object in this bundle version.
+    if (!window.auth0 || !window.auth0.createAuth0Client) {
+      throw new Error('Auth0 SDK not loaded correctly.');
+    }
+
+    auth0Client = await auth0.createAuth0Client({
       domain: 'dev-ej7oma8mgej73zwb.eu.auth0.com',
       clientId: 'bV9k1JybdoaIGE8MSCWerNw1dxzN2rHZ',
       authorizationParams: {

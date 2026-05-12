@@ -569,7 +569,7 @@ nav{
 
 <!-- NAVIGATION -->
 <nav>
-  <div class="logo">Sue<span>Letter</span></div>
+  <button class="logo" onclick="showPage('home')" style="background:none;border:none;cursor:pointer;padding:0;font-family:var(--font-display);font-size:1.4rem;font-weight:700;color:var(--white);letter-spacing:0.5px;transition:color 0.15s">Sue<span>Letter</span></button>
   <div class="nav-r">
     <button class="nav-link" onclick="showPage('home')">Home</button>
     <button class="nav-link" onclick="showPage('generator');renderStep()">Generator</button>
@@ -1430,8 +1430,8 @@ Write a professional 4-6 paragraph letter. Start directly with sender name/addre
     }
 
     document.getElementById('letter-doc').innerHTML = `
-      <div style="font-family: 'Times New Roman', Georgia, serif; font-size: 13.5pt; line-height: 1.85; color: #111827; padding: 55px 60px; background: white; text-align: justify;">
-        ${letterText.replace(/\n/g, '<br><br>')}
+      <div style="font-family: 'Times New Roman', Georgia, serif; font-size: 13.5pt; line-height: 1.8; color: #111827; padding: 55px 60px; background: white; text-align: justify; white-space: pre-wrap; word-wrap: break-word;">
+        ${letterText.split('\n\n').map(para => `<p style="margin-bottom: 1.2rem; text-align: justify; text-indent: 0.5in;">${para.trim()}</p>`).join('')}
       </div>
     `;
 
@@ -1443,8 +1443,8 @@ Write a professional 4-6 paragraph letter. Start directly with sender name/addre
     alert("Failed to connect to AI. Showing sample instead.");
     const sample = buildSampleLetter();
     document.getElementById('letter-doc').innerHTML = `
-      <div style="font-family: 'Times New Roman', Georgia, serif; font-size: 13.5pt; line-height: 1.85; color: #111827; padding: 55px 60px; background: white; text-align: justify;">
-        ${sample.replace(/\n/g, '<br><br>')}
+      <div style="font-family: 'Times New Roman', Georgia, serif; font-size: 13.5pt; line-height: 1.8; color: #111827; padding: 55px 60px; background: white; text-align: justify; white-space: pre-wrap; word-wrap: break-word;">
+        ${sample.split('\n\n').map(para => `<p style="margin-bottom: 1.2rem; text-align: justify; text-indent: 0.5in;">${para.trim()}</p>`).join('')}
       </div>
     `;
     letterGenerated = true;
@@ -1505,7 +1505,9 @@ function editLetter() {
   } else {
     const area = document.getElementById('edit-area');
     const txt = area.value;
-    doc.innerHTML = `<pre style="white-space:pre-wrap;font-family:'Courier New',monospace;font-size:0.76rem;line-height:1.75;color:#aab8d0">${escHtml(txt)}</pre>`;
+    doc.innerHTML = `<div style="font-family: 'Times New Roman', Georgia, serif; font-size: 13.5pt; line-height: 1.8; color: #111827; padding: 55px 60px; background: white; text-align: justify; white-space: pre-wrap; word-wrap: break-word;">
+      ${txt.split('\n\n').map(para => `<p style="margin-bottom: 1.2rem; text-align: justify; text-indent: 0.5in;">${escHtml(para.trim())}</p>`).join('')}
+    </div>`;
     editBtn.textContent = '✏ Edit';
     isEditing = false;
   }

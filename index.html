@@ -28,11 +28,11 @@
 /* ── RESET & ROOT ─────────────────────────────────────────────── */
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --navy:#0c1628; --navy2:#112240; --navy3:#1a3057; --navy4:#243b6e;
-  --slate:#8892b0; --slate2:#a8b2d8; --light:#ccd6f6; --white:#e6f1ff;
-  --gold:#c9a84c; --gold2:#b8963e;
-  --gold-dim:rgba(201,168,76,0.10); --gold-dim2:rgba(201,168,76,0.18);
-  --border:rgba(201,168,76,0.18); --border2:rgba(201,168,76,0.28); --border3:rgba(201,168,76,0.42);
+  --navy:#07101f; --navy2:#0d1b34; --navy3:#16264c; --navy4:#1f3768;
+  --slate:#a3b2d6; --slate2:#bcc6e5; --light:#f4f7ff; --white:#fbfcff;
+  --gold:#f5b900; --gold2:#f7c53b;
+  --gold-dim:rgba(245,185,0,0.12); --gold-dim2:rgba(245,185,0,0.22);
+  --border:rgba(245,185,0,0.18); --border2:rgba(245,185,0,0.28); --border3:rgba(245,185,0,0.42);
   --green:#64ffda; --red:#ff6b6b;
   --shadow:0 4px 24px rgba(0,0,0,0.35); --shadow-lg:0 8px 48px rgba(0,0,0,0.5);
   --radius:6px; --radius-lg:10px;
@@ -43,8 +43,8 @@ body{
   font-family:var(--font-body); background:var(--navy); color:var(--light);
   min-height:100vh; font-size:14px;
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(201,168,76,0.06) 0%, transparent 60%),
-    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c9a84c' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(245,185,0,0.06) 0%, transparent 60%),
+    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f5b900' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
 }
 button{cursor:pointer;font-family:inherit}
 input,select,textarea{font-family:inherit}
@@ -94,9 +94,6 @@ nav{
 .step-n{width:38px;height:38px;border-radius:50%;background:var(--gold-dim);border:1px solid var(--border2);color:var(--gold);font-weight:700;font-size:1rem;display:flex;align-items:center;justify-content:center;margin:0 auto 0.85rem;font-family:var(--font-display)}
 .step h4{font-size:0.88rem;font-weight:600;color:var(--white);margin-bottom:0.35rem}
 .step p{font-size:0.8rem;color:var(--slate);line-height:1.6}
-.home-cta{background:var(--navy2);border-top:1px solid var(--border);padding:3.5rem 2rem;text-align:center}
-.home-cta h2{font-family:var(--font-display);font-size:2rem;font-weight:700;color:var(--white);margin-bottom:0.6rem}
-.home-cta p{color:var(--slate2);margin-bottom:1.75rem;font-size:0.9rem}
 .footer{background:var(--navy2);border-top:1px solid var(--border);padding:1.25rem 2rem;text-align:center;font-size:0.76rem;color:var(--slate)}
 .footer strong{color:var(--slate2)}
 #page-generator{display:none}
@@ -274,67 +271,14 @@ nav{
 
 <!-- NAVIGATION -->
 <nav>
-  <button class="logo" onclick="showPage('home')" style="background:none;border:none;cursor:pointer;padding:0;font-family:var(--font-display);font-size:1.4rem;font-weight:700;color:var(--white);letter-spacing:0.5px;transition:color 0.15s">Sue<span>Letter</span></button>
+  <button class="logo" onclick="showPage('generator');renderStep()" style="background:none;border:none;cursor:pointer;padding:0;font-family:var(--font-display);font-size:1.4rem;font-weight:700;color:var(--white);letter-spacing:0.5px;transition:color 0.15s">Sue<span>Letter</span></button>
   <div class="nav-r">
-    <button class="nav-link" onclick="showPage('home')">Home</button>
     <button class="nav-link" onclick="showPage('generator');renderStep()">Generator</button>
     <button class="nav-link" onclick="showPage('dashboard')">Dashboard</button>
     <button class="btn-login" id="nav-auth-btn" onclick="handleAuthClick()">Log in</button>
     <button class="btn-cta" onclick="showPage('generator');renderStep()">Get Started</button>
   </div>
 </nav>
-
-<!-- HOME PAGE -->
-<div id="page-home" class="page active">
-  <div class="hero">
-    <div class="hero-badge">⚖ Unlimited Letters — No Credit Card Required</div>
-    <h1>Professional <em>Demand Letters</em><br>Drafted by AI</h1>
-    <p class="hero-sub">Jurisdiction-aware demand letters drafted in minutes. Used by individuals, businesses, and legal professionals in 140+ countries.</p>
-    <div class="hero-btns">
-      <button class="btn-hero-p" onclick="showPage('generator');renderStep()">Generate a Letter →</button>
-      <button class="btn-hero-s" onclick="showPage('dashboard')">View Dashboard</button>
-    </div>
-  </div>
-  <div class="stats-strip">
-    <div class="stat-item"><h3>50,000+</h3><p>Letters Generated</p></div>
-    <div class="stat-item"><h3>140+</h3><p>Countries Supported</p></div>
-    <div class="stat-item"><h3>9</h3><p>Letter Types</p></div>
-  </div>
-  <div class="section">
-    <div class="sec-label">Practice Areas</div>
-    <div class="sec-title">Choose Your Letter Type</div>
-    <div class="sec-sub">Nine professionally crafted demand letter categories, each tailored to your jurisdiction.</div>
-    <div class="ltypes">
-      <div class="ltype-card" onclick="startGen('debt')"><span class="ltype-icon">💰</span><h3>Debt Recovery</h3><p>Recover unpaid debts and outstanding invoices</p></div>
-      <div class="ltype-card" onclick="startGen('landlord')"><span class="ltype-icon">🏠</span><h3>Landlord / Tenant Dispute</h3><p>Security deposits, evictions, lease violations, habitability</p></div>
-      <div class="ltype-card" onclick="startGen('refund')"><span class="ltype-icon">🛒</span><h3>Refund &amp; Consumer</h3><p>Product refunds, consumer fraud, warranty disputes</p></div>
-      <div class="ltype-card" onclick="startGen('property')"><span class="ltype-icon">🏚</span><h3>Property Damage</h3><p>Recover damages for destroyed or damaged property</p></div>
-      <div class="ltype-card" onclick="startGen('cease')"><span class="ltype-icon">🚫</span><h3>Cease &amp; Desist</h3><p>Stop harassment, defamation, IP infringement, unlawful conduct</p></div>
-      <div class="ltype-card" onclick="startGen('employment')"><span class="ltype-icon">💼</span><h3>Employment Dispute</h3><p>Wrongful termination, unpaid wages, discrimination</p></div>
-      <div class="ltype-card" onclick="startGen('insurance')"><span class="ltype-icon">📋</span><h3>Insurance Claim</h3><p>Disputed insurance claims, bad faith denials</p></div>
-      <div class="ltype-card" onclick="startGen('contractor')"><span class="ltype-icon">🔧</span><h3>Contractor Dispute</h3><p>Incomplete work, overbilling, construction defects</p></div>
-      <div class="ltype-card" onclick="startGen('credit')"><span class="ltype-icon">📊</span><h3>Credit Report Dispute</h3><p>Dispute inaccurate or fraudulent entries on your credit report</p></div>
-    </div>
-  </div>
-  <div class="section" style="padding-top:0">
-    <div class="sec-label">Process</div>
-    <div class="sec-title">How It Works</div>
-    <div class="sec-sub">Three guided steps to a professionally drafted demand letter.</div>
-    <div class="steps-grid">
-      <div class="step"><div class="step-n">1</div><h4>Select Letter Type</h4><p>Choose from nine demand letter categories that match your legal situation.</p></div>
-      <div class="step"><div class="step-n">2</div><h4>Fill Your Details</h4><p>Answer nine guided steps and upload supporting evidence if needed.</p></div>
-      <div class="step"><div class="step-n">3</div><h4>AI Drafts &amp; Delivers</h4><p>Our AI produces a legally-sound letter citing applicable national statutes.</p></div>
-    </div>
-  </div>
-  <div class="home-cta">
-    <h2>Ready to Take Action?</h2>
-    <p>Generate unlimited professional demand letters — no subscription required.</p>
-    <button class="btn-hero-p" onclick="showPage('generator');renderStep()">Generate Your First Letter →</button>
-  </div>
-  <div class="footer">
-    <strong>SueLetter</strong> — AI-Powered Demand Letter Generator. Not a substitute for legal advice. &copy; 2025 SueLetter.
-  </div>
-</div>
 
 <!-- GENERATOR PAGE -->
 <div id="page-generator" class="page">
@@ -593,7 +537,7 @@ async function logout() {
     isLoggedIn = false;
     currentUser = null;
     updateUIBeforeLogin();
-    showPage('home');
+    showPage('generator'); renderStep();
   } catch (err) {
     console.error('Logout error:', err);
   }
@@ -1170,7 +1114,7 @@ async function emailLetter(){
 // ✅ Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
   auth0InitPromise = initAuth0();
-  showPage('home');
+  showPage('generator'); renderStep();
 });
 </script>
 

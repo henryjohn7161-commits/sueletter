@@ -479,11 +479,19 @@ async function initAuth0() {
   }
 }
 
+function goToMainSite() {
+  window.location.href = 'https://sueletter.com';
+}
+
 function updateUIAfterLogin() {
   const navBtn = document.getElementById('nav-auth-btn');
   const logoutBtn = document.getElementById('dash-logout-btn');
   const greeting = document.getElementById('dash-greeting');
-  if (navBtn) { navBtn.textContent = '✓ Logged In'; navBtn.onclick = () => showPage('dashboard'); }
+  if (navBtn) {
+    navBtn.textContent = '👤';
+    navBtn.title = 'Go to sueletter.com';
+    navBtn.onclick = goToMainSite;
+  }
   if (logoutBtn) logoutBtn.style.display = 'block';
   if (greeting && currentUser) greeting.textContent = `Welcome back, ${currentUser.given_name || currentUser.name || 'User'}`;
 }

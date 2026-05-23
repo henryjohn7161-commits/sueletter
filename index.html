@@ -8,9 +8,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 
-<!-- ✅ AUTH0 SDK MUST BE FIRST — before any script that uses it -->
-<script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
-
 <style>
 /* Print Styles for Clean PDF */
 @media print {
@@ -275,7 +272,6 @@ nav{
   <div class="nav-r">
     <button class="nav-link" onclick="showPage('generator');renderStep()">Generator</button>
     <button class="nav-link" onclick="showPage('dashboard')">Dashboard</button>
-    <button class="btn-login" id="nav-auth-btn" onclick="handleAuthClick()">Log in</button>
     <button class="btn-cta" onclick="showPage('generator');renderStep()">Get Started</button>
   </div>
 </nav>
@@ -356,9 +352,6 @@ nav{
         <h2 id="dash-greeting">Welcome back, User</h2>
         <p>Manage your demand letters and account settings.</p>
       </div>
-      <div>
-        <button class="btn-cta" id="dash-logout-btn" style="display:none" onclick="logout()">Log Out</button>
-      </div>
     </div>
     <div class="dash-stats">
       <div class="dstat"><h4>Letters Generated</h4><p class="gold">1</p></div>
@@ -384,174 +377,6 @@ nav{
     </table>
   </div>
 </div>
-
-<!-- LOGIN OVERLAY -->
-<div class="overlay" id="login-overlay">
-  <div class="login-box">
-    <div class="login-hdr">
-      <div class="lg">Sue<span>Letter</span></div>
-      <p>Sign in to generate your demand letters</p>
-    </div>
-    <div class="login-body">
-      <p>Sign in to continue</p>
-      <button class="sso-btn" onclick="handleLogin()">Sign in</button>
-      <p class="login-terms">By signing in you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></p>
-    </div>
-  </div>
-</div>
-
-<script>
-/* ==================== AUTH0 SETUP ==================== */
-let auth0Client = null;
-let auth0InitPromise = null;
-let auth0InitError = null;
-let isLoggedIn = false;
-let currentUser = null;
-
-function loadAuth0Sdk() {
-  if (window.auth0 && window.auth0.createAuth0Client) {
-    return Promise.resolve();
-  }
-
-  return new Promise((resolve, reject) => {
-    const existing = document.querySelector('script[src*="auth0-spa-js"]');
-    if (existing) {
-      if (window.auth0 && window.auth0.createAuth0Client) {
-        resolve();
-        return;
-      }
-
-      existing.addEventListener('load', () => {
-        return window.auth0 && window.auth0.createAuth0Client ? resolve() : reject(new Error('Auth0 SDK loaded but did not export auth0.createAuth0Client'));
-      });
-      existing.addEventListener('error', () => reject(new Error('Auth0 SDK failed to load')));
-      return;
-    }
-
-    const script = document.createElement('script');
-    script.src = 'https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js';
-    script.onload = () => {
-      if (window.auth0 && window.auth0.createAuth0Client) {
-        resolve();
-      } else {
-        reject(new Error('Auth0 SDK loaded but did not export auth0.createAuth0Client'));
-      }
-    };
-    script.onerror = () => reject(new Error('Auth0 SDK failed to load'));
-    document.head.appendChild(script);
-  });
-}
-
-async function initAuth0() {
-  try {
-    await loadAuth0Sdk();
-
-    auth0Client = await auth0.createAuth0Client({
-      domain: 'dev-ej7oma8mgej73zwb.eu.auth0.com',
-      clientId: 'bV9k1JybdoaIGE8MSCWerNw1dxzN2rHZ',
-      authorizationParams: {
-        redirect_uri: window.location.origin,
-        scope: 'openid profile email'
-      }
-    });
-
-    console.log('✅ Auth0 Client initialized');
-
-    // Handle redirect callback after login
-    const query = window.location.search;
-    if (query.includes('code=') && query.includes('state=')) {
-      await auth0Client.handleRedirectCallback();
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-
-    isLoggedIn = await auth0Client.isAuthenticated();
-    if (isLoggedIn) {
-      currentUser = await auth0Client.getUser();
-      console.log('✅ User logged in:', currentUser.email);
-      updateUIAfterLogin();
-    } else {
-      updateUIBeforeLogin();
-    }
-
-  } catch (err) {
-    auth0InitError = err;
-    console.error('❌ Auth0 initialization error:', err);
-  }
-}
-
-function goToMainSite() {
-  window.location.href = 'https://sueletter.com';
-}
-
-function updateUIAfterLogin() {
-  const navBtn = document.getElementById('nav-auth-btn');
-  const logoutBtn = document.getElementById('dash-logout-btn');
-  const greeting = document.getElementById('dash-greeting');
-  if (navBtn) {
-    navBtn.textContent = '👤';
-    navBtn.title = 'Go to sueletter.com';
-    navBtn.onclick = goToMainSite;
-  }
-  if (logoutBtn) logoutBtn.style.display = 'block';
-  if (greeting && currentUser) greeting.textContent = `Welcome back, ${currentUser.given_name || currentUser.name || 'User'}`;
-}
-
-function updateUIBeforeLogin() {
-  const navBtn = document.getElementById('nav-auth-btn');
-  const logoutBtn = document.getElementById('dash-logout-btn');
-  if (navBtn) { navBtn.textContent = 'Log in'; navBtn.onclick = handleAuthClick; }
-  if (logoutBtn) logoutBtn.style.display = 'none';
-}
-
-async function handleAuthClick() {
-  if (isLoggedIn) { showPage('dashboard'); } else { openLogin(); }
-}
-
-function openLogin() { document.getElementById('login-overlay').classList.add('open'); }
-function closeLogin() { document.getElementById('login-overlay').classList.remove('open'); }
-
-async function handleLogin(connection) {
-  if (auth0InitPromise) {
-    await auth0InitPromise;
-  }
-
-  if (auth0InitError) {
-    alert('Login service failed to initialize. Please refresh the page and try again.');
-    return;
-  }
-
-  if (!auth0Client) {
-    alert('Login service is still loading. Please wait a moment and try again.');
-    return;
-  }
-
-  try {
-    const authParams = { redirect_uri: window.location.origin };
-    if (connection) {
-      authParams.connection = connection;
-    }
-
-    await auth0Client.loginWithRedirect({
-      authorizationParams: authParams
-    });
-  } catch (err) {
-    console.error('Login error:', err);
-    alert('Login failed: ' + err.message);
-  }
-}
-
-async function logout() {
-  if (!auth0Client) return;
-  try {
-    await auth0Client.logout({ logoutParams: { returnTo: window.location.origin } });
-    isLoggedIn = false;
-    currentUser = null;
-    updateUIBeforeLogin();
-    showPage('generator'); renderStep();
-  } catch (err) {
-    console.error('Logout error:', err);
-  }
-}
 
 /* ── CONSTANTS ─────────────────────────────────────────────────── */
 const TYPE_LABELS = {
@@ -1103,14 +928,13 @@ function downloadPDF(){
 
 async function emailLetter(){
   if(!letterGenerated){alert('Please generate a letter first.');return;}
-  if(!isLoggedIn){alert('Please log in first to send emails.');openLogin();return;}
   const recipient=prompt("Enter recipient's email address:",formData.recEmail||'');
   if(!recipient||!recipient.includes('@')){alert("Please enter a valid email.");return;}
   const letterText=getLetterText();
   if(!letterText){alert("No letter content available.");return;}
   const subject=`Formal Demand Letter - ${TYPE_LABELS[formData.type]||'Legal Matter'}`;
   try {
-    const userEmail=currentUser?currentUser.email:"noreply@sueletter.com";
+    const userEmail="noreply@sueletter.com";
     const response=await fetch('/api/send-email',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({to:recipient,subject:subject,letterText:letterText,userEmail:userEmail})
@@ -1123,7 +947,6 @@ async function emailLetter(){
 
 // ✅ Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
-  auth0InitPromise = initAuth0();
   showPage('generator'); renderStep();
 });
 </script>

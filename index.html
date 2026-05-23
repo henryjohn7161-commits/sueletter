@@ -450,16 +450,16 @@ async function initAuth0() {
       domain: 'dev-ej7oma8mgej73zwb.eu.auth0.com',
       clientId: 'bV9k1JybdoaIGE8MSCWerNw1dxzN2rHZ',
       authorizationParams: {
-        redirect_uri: window.location.origin,
+        redirect_uri: window.location.href.split('?')[0], // ← use full URL, not just origin
         scope: 'openid profile email'
-      }
+      },
+      cacheLocation: 'localstorage',
+      useRefreshTokens: true
     });
 
-    console.log('✅ Auth0 Client initialized');
-
-    // Handle redirect callback after login
-    const query = window.location.search;
-    if (query.includes('code=') && query.includes('state=')) {
+    // ✅ Handle the redirect AFTER Google login
+    if (window.location.search.includes('code=') && 
+        window.location.search.includes('state=')) {
       await auth0Client.handleRedirectCallback();
       window.history.replaceState({}, document.title, window.location.pathname);
     }
@@ -467,15 +467,13 @@ async function initAuth0() {
     isLoggedIn = await auth0Client.isAuthenticated();
     if (isLoggedIn) {
       currentUser = await auth0Client.getUser();
-      console.log('✅ User logged in:', currentUser.email);
       updateUIAfterLogin();
     } else {
       updateUIBeforeLogin();
     }
 
   } catch (err) {
-    auth0InitError = err;
-    console.error('❌ Auth0 initialization error:', err);
+    console.error('❌ Auth0 error:', err);
   }
 }
 
@@ -511,24 +509,14 @@ function openLogin() { document.getElementById('login-overlay').classList.add('o
 function closeLogin() { document.getElementById('login-overlay').classList.remove('open'); }
 
 async function handleLogin(connection) {
-  if (auth0InitPromise) {
-    await auth0InitPromise;
-  }
-
-  if (auth0InitError) {
-    alert('Login service failed to initialize. Please refresh the page and try again.');
-    return;
-  }
-
   if (!auth0Client) {
-    alert('Login service is still loading. Please wait a moment and try again.');
+    alert('Auth0 is still initializing. Please wait.');
     return;
   }
-
   try {
     await auth0Client.loginWithRedirect({
       authorizationParams: {
-        redirect_uri: window.location.origin,
+        redirect_uri: window.location.href.split('?')[0], // ← same fix here
         connection: connection
       }
     });

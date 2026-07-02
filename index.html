@@ -921,7 +921,8 @@ function copyLetter(){
 function downloadPDF(){
   const lc = document.getElementById('letter-doc');
   if(!lc || lc.innerHTML.trim().length < 100){
-    alert("No letter generated yet."); return;
+    alert("No letter generated yet.");
+    return;
   }
   const letterHTML = lc.innerHTML;
   const printWindow = window.open('', '_blank');
@@ -929,39 +930,10 @@ function downloadPDF(){
     alert("Please allow popups for sueletter.com to download PDF.");
     return;
   }
-  printWindow.document.write(`
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>Demand Letter — SueLetter</title>
-      <style>
-        body {
-          font-family: 'Times New Roman', Georgia, serif;
-          font-size: 13pt;
-          line-height: 1.8;
-          color: #000;
-          margin: 0;
-          padding: 0;
-        }
-        @media print {
-          body { margin: 0; }
-          @page { margin: 1in; size: A4; }
-        }
-      </style>
-    </head>
-    <body>
-      ${letterHTML}
-      <script>
-        window.onload = function(){
-          setTimeout(function(){
-            window.print();
-            window.close();
-          }, 300);
-        }
-      </script>
-    </body>
-    </html>
-  `);
+  const style = '<style>body{font-family:Times New Roman,Georgia,serif;font-size:13pt;line-height:1.8;color:#000;margin:0;padding:60px;}@media print{body{margin:0;}@page{margin:1in;size:A4;}}</style>';
+  const onload = '<scr'+'ipt>window.onload=function(){setTimeout(function(){window.print();window.close();},300);}<\/scr'+'ipt>';
+  const fullHTML = '<!DOCTYPE html><html><head><title>Demand Letter SueLetter</title>' + style + '</head><body>' + letterHTML + onload + '</body></html>';
+  printWindow.document.write(fullHTML);
   printWindow.document.close();
 }
 

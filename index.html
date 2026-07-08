@@ -956,6 +956,10 @@ async function emailLetter(){
   } catch(e){console.error(e);alert("Error sending email.");}
 }
 
+function goToMainSite(){
+  window.top.location.href = 'https://sueletter.com';
+}
+
 // ✅ Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
   showPage('generator'); renderStep();

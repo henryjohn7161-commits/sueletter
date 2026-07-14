@@ -51,14 +51,13 @@ Brief description provided by the user: "${dispute}"`;
         'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "qwen/qwen3.6-27b", // hardcoded server-side — the client can no longer choose the model
+        model: "llama-3.1-8b-instant", // hardcoded server-side — the client can no longer choose the model
         messages: [
           { role: 'system', content: 'You are a professional legal writing assistant. Output only the requested text, nothing else.' },
           { role: 'user', content: prompt }
         ],
         temperature: 0.7,
-        max_tokens: 1200,
-        reasoning_format: "hidden",
+        max_tokens: 500,
       }),
     });
 

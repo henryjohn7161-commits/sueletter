@@ -820,7 +820,6 @@ Output ONLY the letter text. No extra commentary, notes, or instructions.`;
           {role:"system",content:"You are a professional legal document writer. Generate formal demand letters that follow the exact structure the user provides. Output only the letter text."},
           {role:"user",content:prompt}
         ],
-        model:"qwen/qwen3.6-27b",
         max_tokens:1500,
         temperature:0.6
       })

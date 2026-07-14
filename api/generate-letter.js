@@ -34,8 +34,8 @@ export default async function handler(req, res) {
         model: "qwen/qwen3.6-27b", // hardcoded server-side — the client can no longer choose the model
         messages,
         temperature,
-        max_tokens: Math.max(max_tokens, 2500),
-        reasoning_format: "hidden",
+        max_tokens: Math.min(Math.max(max_tokens, 800), 1400),
+        reasoning_effort: "none",
       }),
     });
 

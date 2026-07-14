@@ -35,7 +35,6 @@ export default async function handler(req, res) {
         messages,
         temperature,
         max_tokens: Math.max(max_tokens, 2500),
-        reasoning_effort: "low",
         reasoning_format: "hidden",
       }),
     });
@@ -43,8 +42,14 @@ export default async function handler(req, res) {
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('Groq API Error:', data);
-      return res.status(response.status).json(data);
+      console.error('Groq API Error:', JSON.stringify(data));
+      let errMsg;
+      if (data.error && typeof data.error === 'object') {
+        errMsg = data.error.message || JSON.stringify(data.error);
+      } else {
+        errMsg = data.error || data.details || `Request failed with status ${response.status}`;
+      }
+      return res.status(response.status).json({ error: errMsg });
     }
 
     // Strip any leaked reasoning/thinking tags before returning to the client
@@ -62,6 +67,6 @@ export default async function handler(req, res) {
     res.status(200).json(data);
   } catch (error) {
     console.error('Server Error:', error);
-    res.status(500).json({ error: 'Failed to generate letter' });
+    res.status(500).json({ error: error.message || 'Failed to generate letter' });
   }
 }

@@ -16,10 +16,6 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'GROQ_API_KEY is not set on this deployment' });
   }
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
   try {
     const { messages, temperature = 0.7, max_tokens = 1500 } = req.body;
 
@@ -38,7 +34,8 @@ export default async function handler(req, res) {
         model: "qwen/qwen3.6-27b", // hardcoded server-side — the client can no longer choose the model
         messages,
         temperature,
-        max_tokens,
+        max_tokens: Math.max(max_tokens, 2500),
+        reasoning_effort: "low",
         reasoning_format: "hidden",
       }),
     });
@@ -55,6 +52,11 @@ export default async function handler(req, res) {
       data.choices[0].message.content = data.choices[0].message.content
         .replace(/<think>[\s\S]*?<\/think>/gi, '')
         .trim();
+    }
+
+    const finishReason = data?.choices?.[0]?.finish_reason;
+    if (!data?.choices?.[0]?.message?.content) {
+      console.error('Empty letter content. finish_reason:', finishReason, 'raw:', JSON.stringify(data));
     }
 
     res.status(200).json(data);

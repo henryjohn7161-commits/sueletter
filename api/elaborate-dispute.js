@@ -57,7 +57,8 @@ Brief description provided by the user: "${dispute}"`;
           { role: 'user', content: prompt }
         ],
         temperature: 0.7,
-        max_tokens: 400,
+        max_tokens: 1200,
+        reasoning_effort: "low",
         reasoning_format: "hidden",
       }),
     });
@@ -69,12 +70,16 @@ Brief description provided by the user: "${dispute}"`;
       return res.status(response.status).json(data);
     }
 
-    // Shape matches what the front-end expects: data.choices[0].message.content
     // Strip any leaked reasoning/thinking tags before returning to the client
     if (data?.choices?.[0]?.message?.content) {
       data.choices[0].message.content = data.choices[0].message.content
         .replace(/<think>[\s\S]*?<\/think>/gi, '')
         .trim();
+    }
+
+    const finishReason = data?.choices?.[0]?.finish_reason;
+    if (!data?.choices?.[0]?.message?.content) {
+      console.error('Empty elaborate content. finish_reason:', finishReason, 'raw:', JSON.stringify(data));
     }
 
     // Shape matches what the front-end expects: data.choices[0].message.content

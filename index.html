@@ -777,7 +777,7 @@ async function generateLetter(){
   // recipient block, Re:/WITHOUT PREJUDICE, salutation, then 5 paragraphs —
   // (1) what happened, (2) impact on you, (3) specific damages requested,
   // (4) general damages / broader remedy, (5) deadline & consequence — then sign-off.
-  const prompt=`Generate a formal demand letter using EXACTLY this structure. Do not add markdown headers or commentary. Use **bold** only for the two labelled amount lines shown below.
+  const prompt=`Generate a formal demand letter that follows this exact legal letter structure. Do not add markdown headers or commentary. Use bold only for the two labelled amount lines shown below.
 
 ${formData.senderName||'[Your Name]'}
 ${formData.senderAddr||'[Your Address]'}
@@ -790,27 +790,26 @@ ${formData.recName||"[Recipient's Name]"}
 ${formData.recAddr||"[Recipient's Address]"}
 ${recCityLine||'[City, State, Zip Code]'}
 
-${subjectLine}
+RE: ${subjectLine}
 WITHOUT PREJUDICE
 
 Dear ${formData.recName||"[Recipient's Name]"},
 
-[Paragraph 1 — what happened: state the facts of the dispute plainly and factually, referencing ${formData.dispute||'the incident'}${formData.incidentDate?` which occurred on ${formData.incidentDate}`:''}. Explain briefly why you are writing this letter. Tone: ${formData.tone}.]
+[Paragraph 1: State the facts of the dispute clearly and concisely, referencing ${formData.dispute||'the incident'}${formData.incidentDate?` which occurred on ${formData.incidentDate}`:''}. Explain why you are writing this letter in a formal tone.]
 
-[Paragraph 2 — impact: explain what issues or losses this has caused you as a direct result of the above.]
+[Paragraph 2: Explain the impact this dispute has had on you, including any financial loss, inconvenience, or other harm suffered as a direct result.]
 
-[Paragraph 3 — specific damages: **Specific Damages Requested:** ${formData.currency||'$'}${formData.amount||'[amount]'} — explain this figure represents concrete, documented losses (e.g. lost income, out-of-pocket costs, repair costs) and that you are prepared to provide supporting documentation.]
+[Paragraph 3: Specific damages requested: **Specific Damages Requested:** ${formData.currency||'$'}${formData.amount||'[amount]'} — explain this figure as concrete, documented losses (lost income, repair costs, fees, etc.) and note that supporting evidence is available.]
 
-[Paragraph 4 — general damages / broader remedy: **Preferred Resolution:** ${formData.resolution||'[resolution]'} — explain why this remedy is fair and reasonable given the circumstances, referencing ${law} where relevant.]
+[Paragraph 4: Preferred resolution: **Preferred Resolution:** ${formData.resolution||'[resolution]'} — state why this remedy is reasonable and appropriate under ${law}.]
 
-[Paragraph 5 — deadline and next steps: Please respond within ${formData.deadline||'14'} days of the date of this letter. State plainly that if the matter is not resolved by then, you will pursue further legal action, referencing ${law}.]
+[Paragraph 5: Deadline and next steps: Request a response within ${formData.deadline||'14'} days from the date of this letter, and state that if the matter is not resolved by then, you will pursue further legal action.]
 
 Sincerely,
 
-
 ${formData.senderName||'[Your Name]'}
 
-Output ONLY the letter text, nothing else.`;
+Output ONLY the letter text. No extra commentary, notes, or instructions.`;
 
   try {
     const response=await fetch('/api/generate-letter',{
@@ -867,23 +866,22 @@ ${formData.recName||"[Recipient's Name]"}
 ${formData.recAddr||"[Recipient's Address]"}
 ${rc||'[City, State, Zip Code]'}
 
-${subjectLine}
+RE: ${subjectLine}
 WITHOUT PREJUDICE
 
 Dear ${formData.recName||"[Recipient's Name]"},
 
-I am writing regarding ${formData.dispute||'[describe the incident]'}${formData.incidentDate?`, which occurred on ${formData.incidentDate}`:''}. Despite my attempts to resolve this matter, it remains outstanding, and I am now writing to formally request a resolution.
+I am writing to formally address ${formData.dispute||'[describe the incident]'}${formData.incidentDate?`, which occurred on ${formData.incidentDate}`:''}. This letter is a formal request for resolution because the matter remains unresolved and requires prompt attention.
 
-As a direct result of this matter, I have experienced financial loss and considerable inconvenience, and I believe it is only fair that this be addressed promptly.
+As a direct result of the above, I have suffered financial loss, inconvenience, and other harms. I have incurred costs and disruptions that should be remedied by the responsible party.
 
-**Specific Damages Requested:** ${formData.currency||'$'}${formData.amount||'[Amount]'}. This figure reflects my documented losses, and I am prepared to provide supporting documentation upon request.
+**Specific Damages Requested:** ${formData.currency||'$'}${formData.amount||'[Amount]'}. This amount represents concrete losses such as documented expenses, repair costs, lost income, and related out-of-pocket damages. Supporting documentation is available upon request.
 
-**Preferred Resolution:** ${formData.resolution||'[resolution]'}. I believe this is a fair and reasonable remedy given the circumstances, consistent with ${law}.
+**Preferred Resolution:** ${formData.resolution||'[resolution]'}. I consider this outcome to be reasonable and appropriate under ${law}, given the facts and the harm caused.
 
-Please respond to this letter within ${formData.deadline||'14'} days of the date above. If this matter is not resolved within that time, I will have no choice but to pursue further legal action to protect my rights.
+Please respond in writing within ${formData.deadline||'14'} days from the date of this letter. If this matter is not resolved by that time, I will consider further legal action to protect my rights.
 
 Sincerely,
-
 
 ${formData.senderName||'[Your Name]'}`;
 }

@@ -58,6 +58,7 @@ Brief description provided by the user: "${dispute}"`;
         ],
         temperature: 0.7,
         max_tokens: 400,
+        reasoning_format: "hidden",
       }),
     });
 
@@ -66,6 +67,14 @@ Brief description provided by the user: "${dispute}"`;
     if (!response.ok) {
       console.error('Groq API Error:', data);
       return res.status(response.status).json(data);
+    }
+
+    // Shape matches what the front-end expects: data.choices[0].message.content
+    // Strip any leaked reasoning/thinking tags before returning to the client
+    if (data?.choices?.[0]?.message?.content) {
+      data.choices[0].message.content = data.choices[0].message.content
+        .replace(/<think>[\s\S]*?<\/think>/gi, '')
+        .trim();
     }
 
     // Shape matches what the front-end expects: data.choices[0].message.content

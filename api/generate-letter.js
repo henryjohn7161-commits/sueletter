@@ -39,6 +39,7 @@ export default async function handler(req, res) {
         messages,
         temperature,
         max_tokens,
+        reasoning_format: "hidden",
       }),
     });
 
@@ -47,6 +48,13 @@ export default async function handler(req, res) {
     if (!response.ok) {
       console.error('Groq API Error:', data);
       return res.status(response.status).json(data);
+    }
+
+    // Strip any leaked reasoning/thinking tags before returning to the client
+    if (data?.choices?.[0]?.message?.content) {
+      data.choices[0].message.content = data.choices[0].message.content
+        .replace(/<think>[\s\S]*?<\/think>/gi, '')
+        .trim();
     }
 
     res.status(200).json(data);

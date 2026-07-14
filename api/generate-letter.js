@@ -20,7 +20,7 @@ export default async function handler(req, res) {
         'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "openai/gpt-oss-120b", // hardcoded server-side — the client can no longer choose the model
+        model: "qwen/qwen3.6-27b", // hardcoded server-side — the client can no longer choose the model
         messages,
         temperature,
         max_tokens,

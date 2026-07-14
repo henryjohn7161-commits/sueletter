@@ -6,7 +6,12 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { messages, model = "llama-3.3-70b-versatile", temperature = 0.7, max_tokens = 1500 } = req.body;
+    const { messages, temperature = 0.7, max_tokens = 1500 } = req.body;
+
+    // Basic validation — reject requests missing the actual letter data
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      return res.status(400).json({ error: 'Missing or invalid messages' });
+    }
 
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
@@ -15,7 +20,7 @@ export default async function handler(req, res) {
         'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
       },
       body: JSON.stringify({
-        model,
+        model: "openai/gpt-oss-120b", // hardcoded server-side — the client can no longer choose the model
         messages,
         temperature,
         max_tokens,

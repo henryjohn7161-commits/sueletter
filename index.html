@@ -488,7 +488,7 @@ ${Object.entries(TYPE_LABELS).map(([k,v]) =>
     c.innerHTML = `<div class="step-title">Your contact details</div>
 <p class="step-desc">This information will appear as the sender in your demand letter.</p>
 <div class="field-group">
-  <div class="field" style="grid-column:1/-1"><label>Full Name <span class="req">*</span></label><input type="text" placeholder="Jane Smith" value="${esc(formData.senderName)}" oninput="formData.senderName=this.value; updateLetterSender()" onblur="formData.senderName=formatNameInput(this.value); this.value=formData.senderName; updateLetterSender()"/></div>
+  <div class="field" style="grid-column:1/-1"><label>Full Name <span class="req">*</span></label><input type="text" placeholder="Jane Smith" value="${esc(formData.senderName)}" oninput="formData.senderName=sanitizeAlphaInput(this.value); this.value=formData.senderName; updateLetterSender()" onblur="formData.senderName=formatNameInput(this.value); this.value=formData.senderName; updateLetterSender()"/></div>
   <div class="field"><label>Street Address <span class="req">*</span></label><input type="text" placeholder="123 Main Street" value="${esc(formData.senderAddr)}" oninput="formData.senderAddr=this.value;updateLetterSender()"/></div>
   <div class="field"><label>City <span class="req">*</span></label><input type="text" placeholder="Los Angeles" value="${esc(formData.senderCity)}" oninput="formData.senderCity=sanitizeAlphaInput(this.value); this.value=formData.senderCity; updateLetterSender()"/></div>
   <div class="field"><label>State / Province <span class="req">*</span></label><input type="text" placeholder="California" value="${esc(formData.senderState)}" oninput="formData.senderState=sanitizeAlphaInput(this.value); this.value=formData.senderState; updateLetterSender()"/></div>
@@ -669,10 +669,23 @@ function updateLetterRecipient(){
   if(rn) rn.textContent=formData.recName||'Recipient Name';
   if(ra) ra.textContent=[formData.recAddr,formData.recCity,formData.recState,formData.recZip].filter(Boolean).join(', ')||'Recipient Address';
 }
-function elaborateDispute(){
+async function elaborateDispute(){
   const el=document.getElementById('f-dispute'); if(!el||!el.value.trim()) return;
   const orig=el.value; el.value='Elaborating with AI…'; el.disabled=true;
-  setTimeout(()=>{ el.value=orig+'\n\nThe above-described conduct constitutes a clear breach of the agreement entered into between the parties. Despite reasonable expectations and prior notices, the respondent has willfully failed to fulfill their contractual and legal obligations, causing substantial and ongoing harm to the claimant.'; el.disabled=false; formData.dispute=el.value; },1200);
+  try{
+    const response=await fetch('/api/elaborate-dispute',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        type:formData.type, currency:formData.currency, amount:formData.amount,
+        incidentDate:formData.incidentDate, dispute:orig
+      })
+    });
+    const data=await response.json();
+    el.value = (data.choices && data.choices[0]?.message?.content?.trim()) || orig;
+  } catch(e){ console.error(e); el.value=orig; }
+  el.disabled=false;
+  formData.dispute=el.value;
 }
 
 /* ── NAVIGATION ────────────────────────────────────────────────── */
@@ -775,7 +788,7 @@ Output ONLY the letter text. No commentary. No markdown except **bold** for the 
           {role:"system",content:"You are a professional legal document writer. Generate formal demand letters. Output only the letter text."},
           {role:"user",content:prompt}
         ],
-        model:"llama-3.3-70b-versatile",
+        model:"openai/gpt-oss-120b",
         max_tokens:1500,
         temperature:0.7
       })
@@ -872,7 +885,7 @@ function renderLetterHTML(text){
     while(i<lines.length&&lines[i].trim()!==''){block.push(lines[i]);i++;}
     if(block.length){
       const combined=block.join(' ').trim();
-      const boldified=combined.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+      const boldified=escHtml(combined).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
       html+=`<p style="${s}margin-bottom:1rem;text-align:justify;">${boldified}</p>`;
     }
     while(i<lines.length&&lines[i].trim()==='')i++;

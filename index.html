@@ -134,6 +134,7 @@ nav{
 .field input::placeholder,.field textarea::placeholder{color:var(--slate)}
 .btn-elaborate{background:var(--gold-dim);border:1px solid var(--border2);color:var(--gold);font-size:0.79rem;font-weight:600;padding:0.45rem 1rem;border-radius:var(--radius);display:inline-flex;align-items:center;gap:0.4rem;margin-top:0.5rem;transition:background 0.15s}
 .btn-elaborate:hover{background:var(--gold-dim2)}
+.btn-elaborate:disabled{opacity:0.6;cursor:not-allowed}
 .tone-cards{display:flex;flex-direction:column;gap:0.65rem}
 .tone-card{background:var(--navy2);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.1rem;cursor:pointer;display:flex;align-items:flex-start;gap:0.75rem;transition:border-color 0.15s}
 .tone-card:hover{border-color:var(--border2)}
@@ -193,6 +194,7 @@ nav{
 .letter-doc .ld-name{font-size:0.85rem;font-weight:600;color:var(--white)}
 .letter-doc .ld-addr,.letter-doc .ld-date{color:var(--slate)}
 .letter-doc .ld-re{font-weight:600;color:var(--white);margin:0.5rem 0 0.25rem}
+.letter-doc .ld-wp{font-weight:600;color:var(--gold);letter-spacing:0.5px;font-size:0.72rem;margin-bottom:0.5rem}
 .letter-doc .ld-body{color:var(--slate);font-size:0.74rem;line-height:1.7}
 .letter-doc .ld-body strong{color:var(--white)}
 .letter-doc .ld-skeleton{display:flex;flex-direction:column;gap:5px;margin:1rem 0}
@@ -253,6 +255,7 @@ nav{
 .ai-spinner{display:none;flex-direction:column;align-items:center;justify-content:center;padding:3rem;gap:1rem;flex:1}
 .spin{width:34px;height:34px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 0.7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+.err-banner{display:none;background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.35);color:var(--red);font-size:0.76rem;padding:0.6rem 0.85rem;border-radius:var(--radius);margin-top:0.6rem;line-height:1.5}
 @media(max-width:768px){
   .ltype-grid,.ltypes{grid-template-columns:1fr 1fr}
   .gen-shell{flex-direction:column}
@@ -320,7 +323,8 @@ nav{
           <p class="ld-name" id="ld-rec-name">Recipient Name</p>
           <p class="ld-addr" id="ld-rec-addr">Recipient Address</p>
           <br/>
-          <p class="ld-re" id="ld-re">RE: FORMAL DEMAND LETTER</p>
+          <p class="ld-re" id="ld-re">Re: Formal Demand Letter</p>
+          <p class="ld-wp">WITHOUT PREJUDICE</p>
           <br/>
           <p class="ld-body">Complete the form steps on the left and click <strong>Generate Letter</strong> to produce your demand letter here.</p>
           <div class="ld-skeleton">
@@ -351,11 +355,11 @@ const TYPE_LABELS = {
   insurance:'Insurance Claim', contractor:'Contractor Dispute', credit:'Credit Report Dispute'
 };
 const TYPE_RE = {
-  debt:'FORMAL DEMAND — DEBT RECOVERY', landlord:'LANDLORD / TENANT DISPUTE — FORMAL DEMAND',
-  refund:'REFUND DEMAND — CONSUMER RIGHTS', property:'PROPERTY DAMAGE — FORMAL DEMAND',
-  cease:'CEASE & DESIST — FORMAL DEMAND', employment:'EMPLOYMENT DISPUTE — FORMAL DEMAND',
-  insurance:'INSURANCE CLAIM DISPUTE', contractor:'CONTRACTOR DISPUTE — FORMAL DEMAND',
-  credit:'CREDIT REPORT DISPUTE — FORMAL DEMAND'
+  debt:'Re: Demand for Payment of Outstanding Debt', landlord:'Re: Landlord / Tenant Dispute — Formal Demand',
+  refund:'Re: Demand for Refund', property:'Re: Compensation for Property Damage',
+  cease:'Re: Cease and Desist Demand', employment:'Re: Compensation for Damages',
+  insurance:'Re: Disputed Insurance Claim', contractor:'Re: Contractor Dispute — Formal Demand',
+  credit:'Re: Credit Report Dispute'
 };
 const COUNTRY_LAWS = {
   'United States':'the FDCPA, FCRA, UCC, and applicable state consumer protection statutes',
@@ -517,9 +521,10 @@ ${Object.entries(TYPE_LABELS).map(([k,v]) =>
   <textarea id="f-dispute" placeholder="Explain what happened, when it occurred, what was agreed upon, and how the other party failed to meet their obligations." style="min-height:120px" oninput="formData.dispute=this.value">${esc(formData.dispute)}</textarea>
 </div>
 <p style="font-size:0.75rem;color:var(--slate);margin-bottom:0.5rem">Be specific — include dates, amounts, and key events.</p>
-<button class="btn-elaborate" onclick="elaborateDispute()">✦ Elaborate with AI</button>
-<p style="font-size:0.73rem;color:var(--slate);margin-top:0.4rem;margin-bottom:1.1rem">AI will expand your brief description into a detailed professional dispute narrative.</p>
-<div class="field-group">
+<button class="btn-elaborate" id="elaborate-btn" onclick="elaborateDispute()">✦ Elaborate with AI</button>
+<p style="font-size:0.73rem;color:var(--slate);margin-top:0.4rem;margin-bottom:0.5rem">AI will expand your brief description into a detailed professional dispute narrative.</p>
+<div class="err-banner" id="elaborate-err"></div>
+<div class="field-group" style="margin-top:1.1rem">
   <div class="field"><label>Date of incident / breach</label><input type="date" value="${formData.incidentDate}" oninput="formData.incidentDate=this.value"/></div>
   <div class="field"><label>Amount demanded <span class="req">*</span></label>
     <div style="display:flex;gap:0.5rem">
@@ -652,7 +657,7 @@ function updateJurisNote(){
   const n=document.getElementById('juris-note-text');
   if(n) n.textContent=countryName+' law applies. Relevant statutes including '+law+' will be automatically cited.';
 }
-function updateLetterRE(){ const el=document.getElementById('ld-re'); if(el&&formData.type) el.textContent='RE: '+(TYPE_RE[formData.type]||'FORMAL DEMAND LETTER'); }
+function updateLetterRE(){ const el=document.getElementById('ld-re'); if(el&&formData.type) el.textContent=(TYPE_RE[formData.type]||'Re: Formal Demand Letter'); }
 function updateLetterSender(){
   const name=document.getElementById('ld-sender');
   const addr=document.getElementById('ld-addr');
@@ -669,9 +674,19 @@ function updateLetterRecipient(){
   if(rn) rn.textContent=formData.recName||'Recipient Name';
   if(ra) ra.textContent=[formData.recAddr,formData.recCity,formData.recState,formData.recZip].filter(Boolean).join(', ')||'Recipient Address';
 }
+
 async function elaborateDispute(){
-  const el=document.getElementById('f-dispute'); if(!el||!el.value.trim()) return;
-  const orig=el.value; el.value='Elaborating with AI…'; el.disabled=true;
+  const el=document.getElementById('f-dispute');
+  const btn=document.getElementById('elaborate-btn');
+  const errBox=document.getElementById('elaborate-err');
+  if(errBox){ errBox.style.display='none'; errBox.textContent=''; }
+  if(!el||!el.value.trim()){
+    if(errBox){ errBox.textContent='Write a short description first, then click Elaborate with AI.'; errBox.style.display='block'; }
+    return;
+  }
+  const orig=el.value;
+  el.disabled=true;
+  if(btn){ btn.disabled=true; btn.textContent='✦ Elaborating…'; }
   try{
     const response=await fetch('/api/elaborate-dispute',{
       method:'POST',
@@ -681,11 +696,33 @@ async function elaborateDispute(){
         incidentDate:formData.incidentDate, dispute:orig
       })
     });
-    const data=await response.json();
-    el.value = (data.choices && data.choices[0]?.message?.content?.trim()) || orig;
-  } catch(e){ console.error(e); el.value=orig; }
-  el.disabled=false;
-  formData.dispute=el.value;
+
+    let data;
+    const raw = await response.text();
+    try { data = JSON.parse(raw); }
+    catch(parseErr){
+      throw new Error(`Server did not return JSON (HTTP ${response.status}). This usually means the /api/elaborate-dispute function is missing, crashed, or GROQ_API_KEY isn't set in Vercel.`);
+    }
+
+    if(!response.ok){
+      throw new Error(data.error || data.details || `Request failed with status ${response.status}`);
+    }
+
+    const content = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+    if(!content){
+      throw new Error('The AI response did not include any text.');
+    }
+
+    el.value = content.trim();
+    formData.dispute = el.value;
+  } catch(e){
+    console.error('elaborateDispute failed:', e);
+    el.value = orig;
+    if(errBox){ errBox.textContent = '⚠ '+e.message; errBox.style.display='block'; }
+  } finally {
+    el.disabled=false;
+    if(btn){ btn.disabled=false; btn.textContent='✦ Elaborate with AI'; }
+  }
 }
 
 /* ── NAVIGATION ────────────────────────────────────────────────── */
@@ -734,8 +771,13 @@ async function generateLetter(){
   const senderCityLine=[formData.senderCity,formData.senderState,formData.senderZip].filter(Boolean).join(', ');
   const recCityLine=[formData.recCity,formData.recState,formData.recZip].filter(Boolean).join(', ');
   const todayDate=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  const subjectLine = TYPE_RE[formData.type] || 'Re: Formal Demand Letter';
 
-  const prompt=`Generate a formal demand letter using EXACTLY this structure (no markdown except **bold** for the four detail labels):
+  // Structure follows the standard "Statement Letter" format: sender block, date,
+  // recipient block, Re:/WITHOUT PREJUDICE, salutation, then 5 paragraphs —
+  // (1) what happened, (2) impact on you, (3) specific damages requested,
+  // (4) general damages / broader remedy, (5) deadline & consequence — then sign-off.
+  const prompt=`Generate a formal demand letter using EXACTLY this structure. Do not add markdown headers or commentary. Use **bold** only for the two labelled amount lines shown below.
 
 ${formData.senderName||'[Your Name]'}
 ${formData.senderAddr||'[Your Address]'}
@@ -748,36 +790,27 @@ ${formData.recName||"[Recipient's Name]"}
 ${formData.recAddr||"[Recipient's Address]"}
 ${recCityLine||'[City, State, Zip Code]'}
 
-Subject: ${TYPE_RE[formData.type]||'Demand for Compensation'}
+${subjectLine}
+WITHOUT PREJUDICE
 
 Dear ${formData.recName||"[Recipient's Name]"},
 
-[Opening paragraph formally demanding compensation for: ${formData.dispute||'the incident'}. Tone: ${formData.tone}. Reference ${law}.]
+[Paragraph 1 — what happened: state the facts of the dispute plainly and factually, referencing ${formData.dispute||'the incident'}${formData.incidentDate?` which occurred on ${formData.incidentDate}`:''}. Explain briefly why you are writing this letter. Tone: ${formData.tone}.]
 
-The details of the incident or issue are as follows:
+[Paragraph 2 — impact: explain what issues or losses this has caused you as a direct result of the above.]
 
-**Date of Incident/Issue:** [date]
+[Paragraph 3 — specific damages: **Specific Damages Requested:** ${formData.currency||'$'}${formData.amount||'[amount]'} — explain this figure represents concrete, documented losses (e.g. lost income, out-of-pocket costs, repair costs) and that you are prepared to provide supporting documentation.]
 
-**Description of Incident/Issue:** ${formData.dispute||'[describe]'}
+[Paragraph 4 — general damages / broader remedy: **Preferred Resolution:** ${formData.resolution||'[resolution]'} — explain why this remedy is fair and reasonable given the circumstances, referencing ${law} where relevant.]
 
-**Damages Sustained:** [describe damages]
-
-**Total Amount of Compensation Demanded:** ${formData.currency||'$'}${formData.amount||'[amount]'}
-
-[Paragraph demanding payment within ${formData.deadline||'15'} days, warning of legal action, citing ${law}.]
-
-[Closing paragraph reserving all rights.]
+[Paragraph 5 — deadline and next steps: Please respond within ${formData.deadline||'14'} days of the date of this letter. State plainly that if the matter is not resolved by then, you will pursue further legal action, referencing ${law}.]
 
 Sincerely,
 
 
 ${formData.senderName||'[Your Name]'}
-${formData.senderAddr||'[Your Address]'}
-${senderCityLine||'[City, State, Zip Code]'}
-${formData.senderEmail||'[Email Address]'}
-${formData.senderPhone||'[Phone Number]'}
 
-Output ONLY the letter text. No commentary. No markdown except **bold** for the four detail labels.`;
+Output ONLY the letter text, nothing else.`;
 
   try {
     const response=await fetch('/api/generate-letter',{
@@ -785,7 +818,7 @@ Output ONLY the letter text. No commentary. No markdown except **bold** for the 
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         messages:[
-          {role:"system",content:"You are a professional legal document writer. Generate formal demand letters. Output only the letter text."},
+          {role:"system",content:"You are a professional legal document writer. Generate formal demand letters that follow the exact structure the user provides. Output only the letter text."},
           {role:"user",content:prompt}
         ],
         model:"openai/gpt-oss-120b",
@@ -793,11 +826,18 @@ Output ONLY the letter text. No commentary. No markdown except **bold** for the 
         temperature:0.7
       })
     });
-    const data=await response.json();
+
+    const raw = await response.text();
+    let data;
+    try { data = JSON.parse(raw); } catch(e){ data = null; }
+
     let letterText='';
-    if(data.choices&&data.choices[0]&&data.choices[0].message){
+    if(response.ok && data && data.choices && data.choices[0] && data.choices[0].message){
       letterText=data.choices[0].message.content.trim();
-    } else { letterText=buildSampleLetter(); }
+    } else {
+      console.error('generate-letter API problem:', response.status, raw);
+      letterText=buildSampleLetter();
+    }
     document.getElementById('letter-doc').innerHTML=renderLetterHTML(letterText);
     letterGenerated=true; revealPostGenerationUI();
   } catch(e){
@@ -815,6 +855,7 @@ function buildSampleLetter(){
   const law=COUNTRY_LAWS[formData.country]||'applicable civil law';
   const sc=[formData.senderCity,formData.senderState,formData.senderZip].filter(Boolean).join(', ');
   const rc=[formData.recCity,formData.recState,formData.recZip].filter(Boolean).join(', ');
+  const subjectLine = TYPE_RE[formData.type] || 'Re: Formal Demand Letter';
   return `${formData.senderName||'[Your Name]'}
 ${formData.senderAddr||'[Your Address]'}
 ${sc||'[City, State, Zip Code]'}
@@ -826,34 +867,25 @@ ${formData.recName||"[Recipient's Name]"}
 ${formData.recAddr||"[Recipient's Address]"}
 ${rc||'[City, State, Zip Code]'}
 
-Subject: ${TYPE_RE[formData.type]||'Demand for Compensation'}
+${subjectLine}
+WITHOUT PREJUDICE
 
 Dear ${formData.recName||"[Recipient's Name]"},
 
-I am writing this letter to formally demand compensation for damages sustained due to ${formData.dispute||'[incident or issue]'}. Despite my previous attempts to contact you and resolve this matter amicably, I have not received an adequate response or an offer for a fair settlement.
+I am writing regarding ${formData.dispute||'[describe the incident]'}${formData.incidentDate?`, which occurred on ${formData.incidentDate}`:''}. Despite my attempts to resolve this matter, it remains outstanding, and I am now writing to formally request a resolution.
 
-The details of the incident or issue are as follows:
+As a direct result of this matter, I have experienced financial loss and considerable inconvenience, and I believe it is only fair that this be addressed promptly.
 
-**Date of Incident/Issue:** ${formData.incidentDate||'[Date of incident]'}
+**Specific Damages Requested:** ${formData.currency||'$'}${formData.amount||'[Amount]'}. This figure reflects my documented losses, and I am prepared to provide supporting documentation upon request.
 
-**Description of Incident/Issue:** ${formData.dispute||'[Describe the incident]'}
+**Preferred Resolution:** ${formData.resolution||'[resolution]'}. I believe this is a fair and reasonable remedy given the circumstances, consistent with ${law}.
 
-**Damages Sustained:** [Property damage, personal injury, or financial loss]
-
-**Total Amount of Compensation Demanded:** ${formData.currency||'$'}${formData.amount||'[Amount]'}
-
-In light of the above, I am demanding compensation in the amount of ${formData.currency||'$'}${formData.amount||'[Amount]'} within ${formData.deadline||'15'} days from the date this letter was received. If I do not hear from you within the specified time frame, I will be forced to consider further legal action pursuant to ${law}.
-
-This letter is written without prejudice to any and all rights and remedies available to me, all of which are expressly reserved.
+Please respond to this letter within ${formData.deadline||'14'} days of the date above. If this matter is not resolved within that time, I will have no choice but to pursue further legal action to protect my rights.
 
 Sincerely,
 
 
-${formData.senderName||'[Your Name]'}
-${formData.senderAddr||'[Your Address]'}
-${sc||'[City, State, Zip Code]'}
-${formData.senderEmail||'[Email Address]'}
-${formData.senderPhone||'[Phone Number]'}`;
+${formData.senderName||'[Your Name]'}`;
 }
 
 function renderLetterHTML(text){
@@ -874,9 +906,12 @@ function renderLetterHTML(text){
   while(i<lines.length&&lines[i].trim()!==''){rLines.push(lines[i]);i++;}
   if(rLines.length) html+=`<div style="margin-bottom:1.4rem;">`+rLines.map(hLine).join('')+`</div>`;
   while(i<lines.length&&lines[i].trim()==='')i++;
-  // Subject
-  if(i<lines.length&&lines[i].trim().toLowerCase().startsWith('subject:')){
-    html+=`<p style="${s}margin-bottom:1.4rem;font-weight:bold;">${escHtml(lines[i].trim())}</p>`;i++;
+  // Subject (Re: ...) + WITHOUT PREJUDICE
+  if(i<lines.length&&/^re:/i.test(lines[i].trim())){
+    html+=`<p style="${s}margin-bottom:0.15rem;font-weight:bold;">${escHtml(lines[i].trim())}</p>`;i++;
+    if(i<lines.length&&/without prejudice/i.test(lines[i].trim())){
+      html+=`<p style="${s}margin-bottom:1.4rem;font-weight:bold;letter-spacing:0.5px;">${escHtml(lines[i].trim())}</p>`;i++;
+    }
   }
   while(i<lines.length&&lines[i].trim()==='')i++;
   // Body

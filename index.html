@@ -521,9 +521,6 @@ ${Object.entries(TYPE_LABELS).map(([k,v]) =>
   <textarea id="f-dispute" placeholder="Explain what happened, when it occurred, what was agreed upon, and how the other party failed to meet their obligations." style="min-height:120px" oninput="formData.dispute=this.value">${esc(formData.dispute)}</textarea>
 </div>
 <p style="font-size:0.75rem;color:var(--slate);margin-bottom:0.5rem">Be specific — include dates, amounts, and key events.</p>
-<button class="btn-elaborate" id="elaborate-btn" onclick="elaborateDispute()">✦ Elaborate with AI</button>
-<p style="font-size:0.73rem;color:var(--slate);margin-top:0.4rem;margin-bottom:0.5rem">AI will expand your brief description into a detailed professional dispute narrative.</p>
-<div class="err-banner" id="elaborate-err"></div>
 <div class="field-group" style="margin-top:1.1rem">
   <div class="field"><label>Date of incident / breach</label><input type="date" value="${formData.incidentDate}" oninput="formData.incidentDate=this.value"/></div>
   <div class="field"><label>Amount demanded <span class="req">*</span></label>
@@ -534,7 +531,10 @@ ${Object.entries(TYPE_LABELS).map(([k,v]) =>
       <input type="number" placeholder="5000" value="${formData.amount}" style="flex:1" oninput="formData.amount=this.value"/>
     </div>
   </div>
-</div>`;
+</div>
+<button class="btn-elaborate" id="elaborate-btn" onclick="elaborateDispute()">✦ Elaborate with AI</button>
+<p style="font-size:0.73rem;color:var(--slate);margin-top:0.4rem;margin-bottom:0.5rem">AI will expand your brief description into a detailed professional dispute narrative.</p>
+<div class="err-banner" id="elaborate-err"></div>`;
   } else if (step === 5) {
     const dlOpts = ['7','14','21','30','45','60'];
     const resOpts = ['Full payment or refund','Cease all offending conduct','Repair or replace damaged property','Return of security deposit','Reinstatement of employment','Insurance claim settlement','Credit report correction'];

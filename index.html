@@ -232,8 +232,8 @@ nav{
 @media(max-width:900px){
   .gen-shell{flex-direction:column}
   .gen-left,.gen-right{width:100%;height:auto}
-  .gen-right{order:1}
-  .gen-left{order:2}
+  .gen-left{order:1}
+  .gen-right{order:2}
   .step-content{padding:1rem}
   .letter-preview-wrap{padding:1rem}
   .letter-actions-bottom{flex-direction:column;align-items:stretch}
@@ -241,6 +241,7 @@ nav{
   .letter-actions{justify-content:flex-start;width:100%}
   .la-btn{min-width:auto;width:100%}
 }
+body.mobile-no-preview .gen-right{display:none!important;}
 @media(max-width:650px){
   body{font-size:15px}
   .hero{padding:3rem 1.2rem 2.5rem}

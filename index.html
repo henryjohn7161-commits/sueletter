@@ -47,6 +47,7 @@ body{
   font-family:var(--font-body); background:var(--navy); color:var(--light);
   min-height:100vh; font-size:14px; background-color:#f4f7fb;
   background-image:linear-gradient(180deg, #f8fbff 0%, #f4f7fb 100%);
+  overflow-x:hidden;
 }
 button{cursor:pointer;font-family:inherit}
 input,select,textarea{font-family:inherit}
@@ -229,6 +230,22 @@ nav{
 #letter-actions-wrap{display:none;width:100%}
 #disc-bar{display:none}
 .disclaimer-bar{background:rgba(255,255,255,0.8);border-bottom:1px solid rgba(15,23,42,0.08);padding:1rem 1.1rem;display:flex;align-items:flex-start;gap:0.75rem;position:relative;flex-shrink:0;border-radius:14px;margin:0 1.25rem 0.75rem}
+@media(max-width:1100px){
+  .gen-shell{grid-template-columns:1fr;gap:1rem;padding:1rem 1rem 1.25rem}
+  .gen-left,.gen-right{width:100%;min-width:auto}
+  .gen-left{order:1}
+  .gen-right{order:2}
+  .step-panel,.preview-panel{min-height:auto}
+  .step-content{padding:1rem}
+  .letter-preview-wrap{padding:1rem}
+  .letter-panel-top{padding:1rem 1rem 0.75rem}
+  .panel-subtext{max-width:none}
+  .generator-header{padding:1.25rem 1rem}
+  .generator-copy{max-width:none}
+  .ltype-grid,.ltypes{grid-template-columns:1fr 1fr}
+  .field-group{grid-template-columns:1fr}
+  .step-content{padding:1rem}
+}
 @media(max-width:900px){
   .gen-shell{flex-direction:column}
   .gen-left,.gen-right{width:100%;height:auto}
@@ -244,14 +261,26 @@ nav{
 body.mobile-no-preview .gen-right{display:none!important;}
 @media(max-width:650px){
   body{font-size:15px}
-  .hero{padding:3rem 1.2rem 2.5rem}
-  .field input,.field select,.field textarea{font-size:0.95rem;padding:0.85rem 0.9rem}
-  .step-title{font-size:1.2rem}
-  .step-desc{font-size:0.95rem}
+  .hero{padding:2.2rem 1rem 2rem}
+  .gen-shell{padding:0 0 1rem;}
+  .gen-left,.gen-right{width:100%;min-width:auto;}
+  .gen-left{order:1}
+  .gen-right{order:2}
+  .step-panel,.preview-panel{min-height:auto}
+  .step-content{padding:1rem 0.9rem 0.75rem}
+  .letter-preview-wrap{padding:1rem 0.85rem 1rem}
+  .letter-panel-top{padding:0.85rem 0.9rem 0.65rem}
+  .letter-actions-bottom{padding:0.9rem 0.9rem 0.95rem}
+  .field input,.field select,.field textarea{font-size:0.92rem;padding:0.75rem 0.8rem}
+  .step-title{font-size:1.15rem}
+  .step-desc{font-size:0.9rem}
   .btn-back,.btn-next,.btn-generate{width:100%}
   .gen-bottom{flex-direction:column;align-items:stretch}
   .panel-foot-note{font-size:0.82rem}
-  body.mobile-no-preview .gen-right{display:none;}
+  .ltype-btn{padding:0.9rem 0.85rem}
+  .ltype-btn .tn{font-size:0.76rem}
+  .ltype-btn .td{font-size:0.68rem}
+  body.mobile-no-preview .gen-right{display:none!important;}
 }
 .disclaimer-bar .warn-icon{color:var(--light);font-size:0.85rem;flex-shrink:0;margin-top:1px}
 .disclaimer-bar p{font-size:0.74rem;color:var(--slate2);line-height:1.5;padding-right:1.5rem}

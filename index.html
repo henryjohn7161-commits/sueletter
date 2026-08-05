@@ -31,6 +31,7 @@ html{color-scheme:dark}
 }
 /* ── RESET & ROOT ─────────────────────────────────────────────── */
 *{box-sizing:border-box;margin:0;padding:0}
+html{overflow-x:hidden}
 :root{
   --navy:#f4f7fb; --navy2:#ffffff; --navy3:#f3f6fb; --navy4:#e8eef7;
   --slate:#64748b; --slate2:#475569; --light:#172033; --white:#0f172a;
@@ -278,9 +279,11 @@ body.mobile-no-preview .gen-right{display:none!important;}
   .btn-back,.btn-next,.btn-generate{width:100%}
   .gen-bottom{flex-direction:column;align-items:stretch}
   .panel-foot-note{font-size:0.82rem}
-  .ltype-btn{padding:0.9rem 0.85rem}
-  .ltype-btn .tn{font-size:0.76rem}
-  .ltype-btn .td{font-size:0.68rem}
+  .ltype-grid,.ltypes{gap:0.5rem}
+  .ltype-btn{padding:0.65rem 0.6rem}
+  .ltype-btn .ti{font-size:0.95rem;margin-bottom:0.2rem}
+  .ltype-btn .tn{font-size:0.7rem;margin-bottom:0.1rem;line-height:1.25}
+  .ltype-btn .td{font-size:0.6rem;line-height:1.25}
   body.mobile-no-preview .gen-right{display:none!important;}
 }
 .disclaimer-bar .warn-icon{color:var(--light);font-size:0.85rem;flex-shrink:0;margin-top:1px}
@@ -1113,8 +1116,11 @@ function goToMainSite(){
 
 /* ── AUTO-RESIZE: report height to the parent page (sueletter.com) ── */
 const PARENT_ORIGIN = 'https://sueletter.com'; // must match your homepage's origin exactly
+let lastReportedHeight = 0;
 function reportHeight() {
   const height = document.documentElement.scrollHeight;
+  if (Math.abs(height - lastReportedHeight) < 4) return; // ignore noise, breaks the feedback loop
+  lastReportedHeight = height;
   window.parent.postMessage({ type: 'sl:resize', height: height }, PARENT_ORIGIN);
 }
 
@@ -1126,10 +1132,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // Fire once now, and again after the first paint settles
   reportHeight();
   setTimeout(reportHeight, 300);
-  window.addEventListener('resize', reportHeight);
-
-  // Auto-fires on ANY height change: step nav, letter generation, edit mode,
-  // evidence toggles, prior-contact toggle, spinner show/hide, etc.
+  // Intentionally no window 'resize' listener calling reportHeight: the
+  // parent resizing the iframe element fires a resize event *inside* this
+  // document too, which would re-trigger reportHeight -> parent resizes
+  // again -> infinite growing loop. ResizeObserver below already reacts
+  // to real content-size changes (including genuine orientation/window
+  // resizes, since those reflow document.body anyway).
   if (window.ResizeObserver) {
     new ResizeObserver(reportHeight).observe(document.body);
   }

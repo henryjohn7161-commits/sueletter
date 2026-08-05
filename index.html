@@ -46,7 +46,7 @@ html{overflow-x:hidden}
 }
 body{
   font-family:var(--font-body); background:var(--navy); color:var(--light);
-  min-height:100vh; font-size:14px; background-color:#f4f7fb;
+  font-size:14px; background-color:#f4f7fb;
   background-image:linear-gradient(180deg, #f8fbff 0%, #f4f7fb 100%);
   overflow-x:hidden;
 }
@@ -113,7 +113,7 @@ nav{
 .step-panel{display:flex;flex-direction:column;min-height:620px}
 .preview-panel{display:flex;flex-direction:column;min-height:620px}
 .gen-right{position:relative}
-.prog-bar{background:transparent;border-bottom:none;padding:1.25rem 1.5rem 0}
+.prog-bar{background:transparent;border-bottom:none;padding:1.25rem 1.5rem 0;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .prog-header{margin-bottom:1rem}
 .step-content{padding:0 1.5rem 1.5rem}
 .letter-panel-top{background:transparent;border:none;padding:1.25rem 1.5rem 0.75rem;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-shrink:0}
@@ -160,7 +160,7 @@ nav{
 .ltype-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.5rem}
 .ltype-btn{background:var(--navy2);border:1px solid var(--border);border-radius:var(--radius);padding:0.9rem;text-align:left;cursor:pointer;transition:border-color 0.15s,background 0.15s}
 .ltype-btn:hover{border-color:var(--border2)}
-.gen-left,.gen-right,.ltype-btn,.ev-type,.field,.res-option,.tone-card{min-width:0}
+.gen-left,.gen-right,.ltype-btn,.ev-type,.field,.res-option,.tone-card,.prog-bar,.prog-steps,.step-panel,.preview-panel{min-width:0}
 .ltype-btn.sel{border-color:var(--gold);background:var(--gold-dim)}
 .ltype-btn .ti{font-size:1.1rem;margin-bottom:0.35rem;display:block}
 .ltype-btn .tn{font-size:0.78rem;font-weight:600;color:var(--white);display:block;margin-bottom:0.15rem}
@@ -262,6 +262,10 @@ nav{
 }
 body.mobile-no-preview .gen-right{display:none!important;}
 @media(max-width:650px){
+  .prog-bar{padding:1rem 0.9rem 0}
+  .prog-step-num{width:22px;height:22px;font-size:0.62rem}
+  .prog-step-label{max-width:32px;font-size:0.5rem}
+  .prog-line{margin-bottom:11px}
   body{font-size:15px}
   .hero{padding:2.2rem 1rem 2rem}
   .gen-shell{padding:0 0 1rem;}

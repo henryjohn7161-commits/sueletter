@@ -1110,10 +1110,28 @@ function goToMainSite(){
   window.top.location.href = 'https://sueletter.com';
 }
 
+/* ── AUTO-RESIZE: report height to the parent page (sueletter.com) ── */
+const PARENT_ORIGIN = 'https://sueletter.com'; // must match your homepage's origin exactly
+function reportHeight() {
+  const height = document.documentElement.scrollHeight;
+  window.parent.postMessage({ type: 'sl:resize', height: height }, PARENT_ORIGIN);
+}
+
 // ✅ Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
   showPage('generator'); renderStep(); updateMobilePreviewView();
   window.addEventListener('resize', updateMobilePreviewView);
+
+  // Fire once now, and again after the first paint settles
+  reportHeight();
+  setTimeout(reportHeight, 300);
+  window.addEventListener('resize', reportHeight);
+
+  // Auto-fires on ANY height change: step nav, letter generation, edit mode,
+  // evidence toggles, prior-contact toggle, spinner show/hide, etc.
+  if (window.ResizeObserver) {
+    new ResizeObserver(reportHeight).observe(document.body);
+  }
 });
 </script>
 </body>

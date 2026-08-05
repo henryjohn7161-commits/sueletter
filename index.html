@@ -99,11 +99,47 @@ nav{
 .footer{background:var(--navy2);border-top:1px solid var(--border);padding:1.25rem 2rem;text-align:center;font-size:0.76rem;color:var(--slate)}
 .footer strong{color:var(--slate2)}
 #page-generator{display:none}
-#page-generator.active{display:flex;flex-direction:column;height:calc(100vh - 58px)}
-.gen-shell{display:flex;flex:1;overflow:hidden}
-.gen-left{width:55%;border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
-.gen-right{width:45%;background:var(--navy2);overflow-y:auto;display:flex;flex-direction:column}
-.prog-bar{background:rgba(255,255,255,0.96);border-bottom:1px solid var(--border);padding:0.85rem 1.5rem}
+#page-generator.active{display:block}
+.gen-shell{display:grid;grid-template-columns:1fr 1.1fr;gap:1.5rem;align-items:start;padding:1.5rem 2rem;overflow:hidden}
+.gen-left,.gen-right{width:auto;display:flex;flex-direction:column;gap:1rem}
+.gen-left{min-width:320px}
+.gen-right{min-width:320px}
+.generator-header{background:var(--navy2);border:1px solid var(--border);border-radius:18px;padding:1.35rem 1.5rem;color:var(--light);box-shadow:var(--shadow);}
+.generator-title{font-family:var(--font-display);font-size:1.85rem;font-weight:800;color:var(--white);margin-bottom:0.35rem;line-height:1.1}
+.generator-copy{font-size:1rem;line-height:1.75;color:var(--slate2);max-width:720px}
+.step-panel,.preview-panel{background:#ffffff;border:1px solid var(--border);border-radius:20px;box-shadow:0 22px 55px rgba(15,23,42,0.08);overflow:hidden}
+.step-panel{display:flex;flex-direction:column;min-height:620px}
+.preview-panel{display:flex;flex-direction:column;min-height:620px}
+.gen-right{position:relative}
+.prog-bar{background:transparent;border-bottom:none;padding:0}
+.prog-header{margin-bottom:1rem}
+.step-content{padding:0 1.5rem 1.5rem}
+.letter-panel-top{background:transparent;border:none;padding:1.25rem 1.5rem 0.75rem;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-shrink:0}
+.gen-letter-label{font-size:0.82rem;font-weight:700;letter-spacing:1px;color:var(--gold);text-transform:uppercase}
+.panel-subtext{font-size:0.95rem;color:var(--slate2);line-height:1.7;max-width:660px}
+.letter-preview-wrap{flex:1;padding:0 1.5rem 1.5rem;overflow-y:auto}
+.letter-doc{background:#f8fbff;border:1px solid rgba(75,107,138,0.16);border-radius:18px;padding:1.75rem;font-family:'Georgia','Times New Roman',serif;font-size:0.9rem;line-height:1.85;color:#1f2937;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.4)}
+.letter-doc .ld-name{font-size:0.95rem;font-weight:700;color:#0f172a}
+.letter-doc .ld-addr,.letter-doc .ld-date{color:#334155}
+.letter-doc .ld-re{font-weight:700;color:#0f172a;margin:0.5rem 0 0.35rem}
+.letter-doc .ld-wp{font-weight:700;color:#111827;letter-spacing:0.5px;font-size:0.78rem;margin-bottom:0.55rem}
+.letter-doc .ld-body{font-size:0.92rem;color:#334155}
+.letter-doc .ld-body strong{color:#0f172a}
+.letter-doc .ld-sign{color:#334155;font-size:0.92rem;margin-top:0.9rem}
+.letter-doc .ld-name-sign{color:#475569;margin-top:0.45rem;font-size:0.9rem}
+.letter-doc .ld-separator{border:none;border-top:1px solid rgba(15,23,42,0.08);margin:0.75rem 0}
+.panel-foot{background:transparent;border:none;padding:1rem 1.5rem 1.5rem;display:flex;justify-content:space-between;align-items:center;gap:0.75rem;flex-wrap:wrap}
+.panel-foot-note{font-size:0.88rem;color:#475569;display:flex;align-items:center;gap:0.45rem}
+.panel-foot-note .warn-s{color:var(--gold)}
+.letter-actions-bottom{background:transparent;border:none;padding:1rem 1.5rem 1.5rem;display:flex;justify-content:space-between;align-items:center;gap:0.75rem;flex-wrap:wrap}
+.letter-actions-bottom .letter-actions{display:flex;flex-wrap:wrap;gap:0.75rem;justify-content:flex-end}
+.la-btn{background:none;border:1px solid rgba(15,23,42,0.12);color:#0f172a;font-size:0.95rem;padding:0.95rem 1.2rem;border-radius:14px;display:flex;align-items:center;gap:0.5rem;transition:border-color 0.15s,color 0.15s,background 0.15s;min-width:150px;justify-content:center}
+.la-btn:hover{border-color:var(--gold);color:#0f172a;background:rgba(255,255,255,0.96)}
+.la-btn.pdf{background:var(--gold);border-color:var(--gold);color:#0f172a;font-weight:700}
+.la-btn.pdf:hover{background:var(--gold2);color:#0f172a}
+#letter-actions-wrap{display:none;width:100%}
+.disclaimer-bar{background:rgba(255,255,255,0.9);border-bottom:1px solid rgba(15,23,42,0.08);padding:1rem 1.25rem;display:flex;align-items:flex-start;gap:0.75rem;position:relative;flex-shrink:0;border-radius:18px;margin:0 1.5rem 1rem}
+.disclaimer-bar p{font-size:0.86rem;color:#475569;padding-right:0}
 .prog-header{display:flex;align-items:center;gap:0.6rem;margin-bottom:0.85rem}
 .doc-icon{width:30px;height:30px;background:var(--gold-dim);border:1px solid var(--border2);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:0.9rem}
 .prog-header span{font-size:0.7rem;font-weight:600;color:var(--light);text-transform:uppercase;letter-spacing:1px}
@@ -171,25 +207,50 @@ nav{
 .toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left 0.2s}
 .toggle.on::after{left:18px}
 .prior-note{background:var(--navy3);border:1px solid var(--border);border-radius:var(--radius);padding:0.85rem;font-size:0.79rem;color:var(--slate2);line-height:1.55}
-.gen-bottom{background:rgba(255,255,255,0.96);border-top:1px solid var(--border);padding:0.85rem 1.75rem;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
-.btn-back{background:none;border:1px solid var(--border);color:var(--slate2);font-size:0.84rem;padding:0.55rem 1.1rem;border-radius:var(--radius);display:flex;align-items:center;gap:0.4rem;transition:border-color 0.15s,color 0.15s}
+.gen-bottom{background:rgba(255,255,255,0.96);border-top:1px solid var(--border);padding:0.95rem 1.75rem;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;gap:1rem;flex-wrap:wrap}
+.btn-back{background:none;border:1px solid var(--border);color:var(--slate2);font-size:0.95rem;padding:0.75rem 1.2rem;border-radius:12px;display:flex;align-items:center;gap:0.5rem;transition:border-color 0.15s,color 0.15s}
 .btn-back:hover{border-color:var(--border2);color:var(--light)}
-.btn-next{background:var(--gold);color:var(--light);font-weight:600;font-size:0.86rem;padding:0.55rem 1.5rem;border:none;border-radius:var(--radius);display:flex;align-items:center;gap:0.4rem;transition:background 0.15s}
+.btn-next{background:var(--gold);color:var(--light);font-weight:700;font-size:0.97rem;padding:0.75rem 1.35rem;border:none;border-radius:12px;display:flex;align-items:center;gap:0.45rem;transition:background 0.15s}
 .btn-next:hover{background:var(--gold2)}
-.btn-generate{background:var(--gold);color:var(--light);font-weight:600;font-size:0.86rem;padding:0.55rem 1.7rem;border:none;border-radius:var(--radius);transition:background 0.15s}
+.btn-generate{background:var(--gold);color:var(--light);font-weight:700;font-size:0.97rem;padding:0.75rem 1.5rem;border:none;border-radius:12px;transition:background 0.15s}
 .btn-generate:hover{background:var(--gold2)}
-.free-label{font-size:0.74rem;color:var(--slate)}
+.free-label{font-size:0.82rem;color:var(--slate2);font-weight:600}
 .free-label a{color:var(--gold)}
-.letter-panel-top{background:rgba(255,255,255,0.96);border-bottom:1px solid var(--border);padding:0.75rem 1.25rem;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
-.gen-letter-label{font-size:0.68rem;font-weight:600;letter-spacing:1px;color:var(--gold);text-transform:uppercase}
-.letter-actions{display:flex;gap:0.4rem}
-.la-btn{background:none;border:1px solid var(--border);color:var(--slate2);font-size:0.74rem;padding:0.3rem 0.7rem;border-radius:5px;display:flex;align-items:center;gap:0.3rem;transition:border-color 0.15s,color 0.15s}
-.la-btn:hover{border-color:var(--border2);color:var(--light)}
-.la-btn.pdf{background:var(--gold);border-color:var(--gold);color:var(--light);font-weight:600}
+.letter-panel-top{background:transparent;border:none;padding:1rem 1.25rem 0.75rem;display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;flex-shrink:0}
+.gen-letter-label{font-size:0.9rem;font-weight:700;letter-spacing:1px;color:var(--gold);text-transform:uppercase}
+.panel-subtext{font-size:0.95rem;color:var(--slate2);line-height:1.5;max-width:680px;text-align:right}
+.letter-actions-bottom{background:rgba(255,255,255,0.96);border-top:1px solid var(--border);padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:center;gap:0.75rem;flex-wrap:wrap;flex-shrink:0}
+.letter-actions-bottom .letter-actions{display:flex;flex-wrap:wrap;gap:0.75rem;justify-content:flex-end}
+.letter-actions{display:flex;gap:0.75rem}
+.la-btn{background:none;border:1px solid var(--border);color:var(--slate2);font-size:0.95rem;padding:0.85rem 1.1rem;border-radius:12px;display:flex;align-items:center;gap:0.5rem;transition:border-color 0.15s,color 0.15s,background 0.15s;min-width:135px;justify-content:center}
+.la-btn:hover{border-color:var(--border2);color:var(--white);background:var(--gold2)}
+.la-btn.pdf{background:var(--gold);border-color:var(--gold);color:var(--white);font-weight:700}
 .la-btn.pdf:hover{background:var(--gold2)}
-#letter-actions-wrap{display:none}
+#letter-actions-wrap{display:none;width:100%}
 #disc-bar{display:none}
-.disclaimer-bar{background:rgba(255,255,255,0.05);border-bottom:1px solid rgba(255,255,255,0.12);padding:0.7rem 1.1rem;display:flex;align-items:flex-start;gap:0.5rem;position:relative;flex-shrink:0}
+.disclaimer-bar{background:rgba(255,255,255,0.8);border-bottom:1px solid rgba(15,23,42,0.08);padding:1rem 1.1rem;display:flex;align-items:flex-start;gap:0.75rem;position:relative;flex-shrink:0;border-radius:14px;margin:0 1.25rem 0.75rem}
+@media(max-width:900px){
+  .gen-shell{flex-direction:column}
+  .gen-left,.gen-right{width:100%;height:auto}
+  .gen-right{order:1}
+  .gen-left{order:2}
+  .step-content{padding:1rem}
+  .letter-preview-wrap{padding:1rem}
+  .letter-actions-bottom{flex-direction:column;align-items:stretch}
+  .panel-subtext{text-align:left;max-width:none}
+  .letter-actions{justify-content:flex-start;width:100%}
+  .la-btn{min-width:auto;width:100%}
+}
+@media(max-width:650px){
+  body{font-size:15px}
+  .hero{padding:3rem 1.2rem 2.5rem}
+  .field input,.field select,.field textarea{font-size:0.95rem;padding:0.85rem 0.9rem}
+  .step-title{font-size:1.2rem}
+  .step-desc{font-size:0.95rem}
+  .btn-back,.btn-next,.btn-generate{width:100%}
+  .gen-bottom{flex-direction:column;align-items:stretch}
+  .panel-foot-note{font-size:0.82rem}
+}
 .disclaimer-bar .warn-icon{color:var(--light);font-size:0.85rem;flex-shrink:0;margin-top:1px}
 .disclaimer-bar p{font-size:0.74rem;color:var(--slate2);line-height:1.5;padding-right:1.5rem}
 .disclaimer-bar p strong{color:var(--light)}
@@ -287,11 +348,17 @@ nav{
 <div id="page-generator" class="page">
   <div class="gen-shell">
     <div class="gen-left">
-      <div class="prog-bar">
-        <div class="prog-header"><div class="doc-icon">📄</div><span>Letter Details</span></div>
-        <div class="prog-steps" id="prog-steps"></div>
+      <div class="generator-header">
+        <div class="generator-title">Demand Letter Generator</div>
+        <div class="generator-copy">Work through each step on the left to customize your demand letter. When it is ready, your letter appears in a polished preview on the right with action buttons below.</div>
       </div>
-      <div class="step-content" id="step-content"></div>
+      <div class="step-panel">
+        <div class="prog-bar">
+          <div class="prog-header"><div class="doc-icon">📄</div><span>Letter Details</span></div>
+          <div class="prog-steps" id="prog-steps"></div>
+        </div>
+        <div class="step-content" id="step-content"></div>
+      </div>
       <div class="gen-bottom">
         <button class="btn-back" id="btn-back" onclick="prevStep()">‹ Back</button>
         <div class="free-label">Unlimited Letters</div>
@@ -299,54 +366,56 @@ nav{
       </div>
     </div>
     <div class="gen-right">
-      <div class="letter-panel-top">
-        <span class="gen-letter-label">⚖ Live Preview</span>
-        <div class="letter-actions" id="letter-actions-wrap">
-          <button class="la-btn" id="edit-btn" onclick="editLetter()">✏ Edit</button>
-          <button class="la-btn" id="copy-btn" onclick="copyLetter()">⬡ Copy</button>
-          <button class="la-btn pdf" onclick="downloadPDF()">⬇ PDF</button>
-          <button class="la-btn" onclick="emailLetter()">✉ Email</button>
+      <div class="preview-panel">
+        <div class="letter-panel-top">
+          <span class="gen-letter-label">⚖ Live Preview</span>
+          <span class="panel-subtext">The draft appears here as soon as you generate it. Then use the buttons below to download, copy, or email the letter.</span>
         </div>
-      </div>
-      <div class="disclaimer-bar" id="disc-bar">
-        <span class="warn-icon">⚠</span>
-        <p><strong>Disclaimer:</strong> This tool does not provide legal advice. The generated letter is a starting point — consult a licensed attorney before sending for complex legal matters.</p>
-        <button class="disc-close" onclick="document.getElementById('disc-bar').style.display='none'">×</button>
-      </div>
-      <div id="ai-spinner" class="ai-spinner">
-        <div class="spin"></div>
-        <p style="color:var(--slate2);font-size:0.84rem">Drafting your letter…</p>
-      </div>
-      <div class="letter-preview-wrap" id="letter-preview-wrap">
-        <div class="letter-doc" id="letter-doc">
-          <p class="ld-name" id="ld-sender">YOUR NAME</p>
-          <p class="ld-addr" id="ld-addr">Your Address, City, ST ZIP</p>
-          <p class="ld-addr" id="ld-contact"></p>
-          <hr class="ld-separator"/>
-          <p class="ld-date" id="ld-date"></p>
-          <br/>
-          <p class="ld-name" id="ld-rec-name">Recipient Name</p>
-          <p class="ld-addr" id="ld-rec-addr">Recipient Address</p>
-          <br/>
-          <p class="ld-re" id="ld-re">Re: Formal Demand Letter</p>
-          <p class="ld-wp">WITHOUT PREJUDICE</p>
-          <br/>
-          <p class="ld-body">Complete the form steps on the left and click <strong>Generate Letter</strong> to produce your demand letter here.</p>
-          <div class="ld-skeleton">
-            <div class="skel-line" style="width:85%"></div>
-            <div class="skel-line" style="width:70%"></div>
-            <div class="skel-line" style="width:90%"></div>
-            <div class="skel-line" style="width:60%"></div>
+        <div class="disclaimer-bar" id="disc-bar">
+          <span class="warn-icon">⚠</span>
+          <p><strong>Disclaimer:</strong> This tool does not provide legal advice. The generated letter is a starting point — consult a licensed attorney before sending for complex legal matters.</p>
+          <button class="disc-close" onclick="document.getElementById('disc-bar').style.display='none'">×</button>
+        </div>
+        <div id="ai-spinner" class="ai-spinner">
+          <div class="spin"></div>
+          <p style="color:var(--slate2);font-size:0.84rem">Drafting your letter…</p>
+        </div>
+        <div class="letter-preview-wrap" id="letter-preview-wrap">
+          <div class="letter-doc" id="letter-doc">
+            <p class="ld-name" id="ld-sender">YOUR NAME</p>
+            <p class="ld-addr" id="ld-addr">Your Address, City, ST ZIP</p>
+            <p class="ld-addr" id="ld-contact"></p>
+            <hr class="ld-separator"/>
+            <p class="ld-date" id="ld-date"></p>
+            <br/>
+            <p class="ld-name" id="ld-rec-name">Recipient Name</p>
+            <p class="ld-addr" id="ld-rec-addr">Recipient Address</p>
+            <br/>
+            <p class="ld-re" id="ld-re">Re: Formal Demand Letter</p>
+            <p class="ld-wp">WITHOUT PREJUDICE</p>
+            <br/>
+            <p class="ld-body">Complete the form steps on the left and click <strong>Generate Letter</strong> to produce your demand letter here.</p>
+            <div class="ld-skeleton">
+              <div class="skel-line" style="width:85%"></div>
+              <div class="skel-line" style="width:70%"></div>
+              <div class="skel-line" style="width:90%"></div>
+              <div class="skel-line" style="width:60%"></div>
+            </div>
+            <hr class="ld-separator"/>
+            <p class="ld-sign">Sincerely,</p>
+            <div class="skel-line" style="width:120px;margin:0.5rem 0"></div>
+            <p class="ld-name-sign" id="ld-sign-name">Your Name</p>
           </div>
-          <hr class="ld-separator"/>
-          <p class="ld-sign">Sincerely,</p>
-          <div class="skel-line" style="width:120px;margin:0.5rem 0"></div>
-          <p class="ld-name-sign" id="ld-sign-name">Your Name</p>
         </div>
-      </div>
-      <div class="panel-foot">
-        <span class="panel-foot-note" id="panel-foot-note"><span class="warn-s">⚠</span> Fill in the form and click Generate Letter</span>
-        <span class="upgrade-link">Unlimited Access</span>
+        <div class="letter-actions-bottom" id="letter-actions-wrap">
+          <div class="panel-foot-note" id="panel-foot-note"><span class="warn-s">⚠</span> Fill in the form and click Generate Letter.</div>
+          <div class="letter-actions">
+            <button class="la-btn" id="edit-btn" onclick="editLetter()">✏ Edit</button>
+            <button class="la-btn" id="copy-btn" onclick="copyLetter()">⬡ Copy</button>
+            <button class="la-btn pdf" onclick="downloadPDF()">⬇ Download Your PDF</button>
+            <button class="la-btn" onclick="emailLetter()">✉ Email</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

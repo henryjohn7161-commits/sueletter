@@ -250,6 +250,7 @@ nav{
   .btn-back,.btn-next,.btn-generate{width:100%}
   .gen-bottom{flex-direction:column;align-items:stretch}
   .panel-foot-note{font-size:0.82rem}
+  body.mobile-no-preview .gen-right{display:none;}
 }
 .disclaimer-bar .warn-icon{color:var(--light);font-size:0.85rem;flex-shrink:0;margin-top:1px}
 .disclaimer-bar p{font-size:0.74rem;color:var(--slate2);line-height:1.5;padding-right:1.5rem}
@@ -825,11 +826,17 @@ function nextStep(){
 function prevStep(){ if(step>1){step--;renderStep();} }
 
 /* ── POST-GENERATION UI ────────────────────────────────────────── */
+function updateMobilePreviewView(){
+  const mobile = window.matchMedia('(max-width:650px)').matches;
+  document.body.classList.toggle('mobile-no-preview', mobile && !letterGenerated);
+}
+
 function revealPostGenerationUI(){
   document.getElementById('letter-actions-wrap').style.display='flex';
   document.getElementById('disc-bar').style.display='flex';
   const fn=document.getElementById('panel-foot-note');
   if(fn) fn.innerHTML='<span class="warn-s">✓</span> Letter generated successfully';
+  updateMobilePreviewView();
 }
 
 /* ── LETTER GENERATION ─────────────────────────────────────────── */
@@ -1075,7 +1082,8 @@ function goToMainSite(){
 
 // ✅ Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
-  showPage('generator'); renderStep();
+  showPage('generator'); renderStep(); updateMobilePreviewView();
+  window.addEventListener('resize', updateMobilePreviewView);
 });
 </script>
 </body>

@@ -13,7 +13,7 @@
         y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
     })(window, document, "clarity", "script", "x4eiddvkpu");
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha512-xFxQOS55q0fa5egP7n4IlykSQwxrK+jP2BD8AumH+UFP5fY8QqCzhgGvV4x8nI4O9Iswd0l5KWrQXLObS57i4A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
 html{color-scheme:dark}
@@ -1082,18 +1082,28 @@ function copyLetter(){
   });
 }
 
+function loadJsPDFFallback(onReady){
+  const s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js';
+  s.onload = onReady;
+  s.onerror = function(){
+    alert('Could not load the PDF engine. If you use Brave, try turning Shields off for this site, or try a different browser, then try again.');
+  };
+  document.head.appendChild(s);
+}
+
 function downloadPDF(){
   const lc = document.getElementById('letter-doc');
   if(!lc || lc.innerHTML.trim().length < 100){
     alert("No letter generated yet.");
     return;
   }
-  const letterHTML = lc.innerHTML;
-  const { jsPDF } = window.jspdf || {};
-  if(!jsPDF){
-    alert('PDF library not loaded. Please refresh the page and try again.');
+  if(!(window.jspdf && window.jspdf.jsPDF)){
+    loadJsPDFFallback(downloadPDF);
     return;
   }
+  const letterHTML = lc.innerHTML;
+  const { jsPDF } = window.jspdf;
 
   const txt = getLetterText();
   if(!txt){alert('No letter content available.');return;}
@@ -1121,7 +1131,20 @@ function downloadPDF(){
   }
 
   const fileName = `Demand_Letter_${new Date().toISOString().slice(0,10)}.pdf`;
-  doc.save(fileName);
+  try {
+    const blob = doc.output('blob');
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 1500);
+  } catch(err){
+    console.error('Direct download failed, opening in new tab instead:', err);
+    doc.output('dataurlnewwindow');
+  }
 }
 
 async function emailLetter(){

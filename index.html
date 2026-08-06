@@ -17,17 +17,15 @@
 <style>
 html{color-scheme:dark}
 /* Print Styles for Clean PDF */
+#sl-print-box { display: none; }
 @media print {
-  body * { visibility: hidden; }
-  #letter-doc, #letter-doc * { visibility: visible; }
-  #letter-doc {
-    position: absolute; left: 0; top: 0; width: 100%;
+  body.sl-printing > *:not(#sl-print-box) { display: none !important; }
+  body.sl-printing #sl-print-box {
+    display: block !important;
     padding: 60px 50px; font-family: 'Times New Roman', serif;
     font-size: 13pt; line-height: 1.8; color: #000;
     white-space: pre-wrap; background: white;
   }
-  nav, .progress-bar, .live-preview-header, .letter-actions-wrap,
-  button, .gen-left, #disc-bar { display: none !important; }
 }
 /* ── RESET & ROOT ─────────────────────────────────────────────── */
 *{box-sizing:border-box;margin:0;padding:0}
@@ -1088,7 +1086,23 @@ function downloadPDF(){
     return;
   }
   if(isEditing) editLetter();
+
+  let printBox = document.getElementById('sl-print-box');
+  if(!printBox){
+    printBox = document.createElement('div');
+    printBox.id = 'sl-print-box';
+    document.body.appendChild(printBox);
+  }
+  printBox.innerHTML = lc.innerHTML;
+  document.body.classList.add('sl-printing');
+
+  function cleanup(){
+    document.body.classList.remove('sl-printing');
+    window.removeEventListener('afterprint', cleanup);
+  }
+  window.addEventListener('afterprint', cleanup);
   window.print();
+  setTimeout(cleanup, 2000); // fallback: some Android browsers never fire afterprint
 }
 
 async function emailLetter(){

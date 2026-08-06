@@ -468,11 +468,11 @@ const TYPE_LABELS = {
   insurance:'Insurance Claim', contractor:'Contractor Dispute', credit:'Credit Report Dispute'
 };
 const TYPE_RE = {
-  debt:'Re: Demand for Payment of Outstanding Debt', landlord:'Re: Landlord / Tenant Dispute — Formal Demand',
-  refund:'Re: Demand for Refund', property:'Re: Compensation for Property Damage',
-  cease:'Re: Cease and Desist Demand', employment:'Re: Compensation for Damages',
-  insurance:'Re: Disputed Insurance Claim', contractor:'Re: Contractor Dispute — Formal Demand',
-  credit:'Re: Credit Report Dispute'
+  debt:'Demand for Payment of Outstanding Debt', landlord:'Landlord / Tenant Dispute — Formal Demand',
+  refund:'Demand for Refund', property:'Compensation for Property Damage',
+  cease:'Cease and Desist Demand', employment:'Compensation for Damages',
+  insurance:'Disputed Insurance Claim', contractor:'Contractor Dispute — Formal Demand',
+  credit:'Credit Report Dispute'
 };
 const COUNTRY_LAWS = {
   'United States':'the FDCPA, FCRA, UCC, and applicable state consumer protection statutes',
@@ -770,7 +770,12 @@ function updateJurisNote(){
   const n=document.getElementById('juris-note-text');
   if(n) n.textContent=countryName+' law applies. Relevant statutes including '+law+' will be automatically cited.';
 }
-function updateLetterRE(){ const el=document.getElementById('ld-re'); if(el&&formData.type) el.textContent=(TYPE_RE[formData.type]||'Re: Formal Demand Letter'); }
+function updateLetterRE(){
+  const el=document.getElementById('ld-re');
+  if(!el){return;}
+  const subject = TYPE_RE[formData.type] || 'Formal Demand Letter';
+  el.textContent = `Re: ${subject}`;
+}
 function updateLetterSender(){
   const name=document.getElementById('ld-sender');
   const addr=document.getElementById('ld-addr');
@@ -890,7 +895,7 @@ async function generateLetter(){
   const senderCityLine=[formData.senderCity,formData.senderState,formData.senderZip].filter(Boolean).join(', ');
   const recCityLine=[formData.recCity,formData.recState,formData.recZip].filter(Boolean).join(', ');
   const todayDate=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
-  const subjectLine = TYPE_RE[formData.type] || 'Re: Formal Demand Letter';
+  const subjectLine = TYPE_RE[formData.type] || 'Formal Demand Letter';
 
   // Structure follows the standard "Statement Letter" format: sender block, date,
   // recipient block, Re:/WITHOUT PREJUDICE, salutation, then 5 paragraphs —
@@ -972,7 +977,7 @@ function buildSampleLetter(){
   const law=COUNTRY_LAWS[formData.country]||'applicable civil law';
   const sc=[formData.senderCity,formData.senderState,formData.senderZip].filter(Boolean).join(', ');
   const rc=[formData.recCity,formData.recState,formData.recZip].filter(Boolean).join(', ');
-  const subjectLine = TYPE_RE[formData.type] || 'Re: Formal Demand Letter';
+  const subjectLine = TYPE_RE[formData.type] || 'Formal Demand Letter';
   return `${formData.senderName||'[Your Name]'}
 ${formData.senderAddr||'[Your Address]'}
 ${sc||'[City, State, Zip Code]'}

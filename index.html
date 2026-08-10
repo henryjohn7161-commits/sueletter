@@ -1094,16 +1094,6 @@ async function downloadPDF(){
   const origText = btn ? btn.innerHTML : '';
   if(btn){ btn.innerHTML = '⬇ Preparing PDF…'; btn.disabled = true; }
 
-  // Strip the on-screen border/rounded-corner/padding styling so it doesn't get
-  // baked into the exported PDF as a visible box. Restored in finally{}.
-  const prevBorder = lc.style.border;
-  const prevRadius = lc.style.borderRadius;
-  const prevPadding = lc.style.padding;
-  const prevWidth = lc.style.width;
-  lc.style.border = 'none';
-  lc.style.borderRadius = '0';
-  lc.style.padding = '0';
-
   try {
     if(!window.jspdf){
       await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
@@ -1116,6 +1106,22 @@ async function downloadPDF(){
     return;
   }
 
+  // Build a detached, off-screen clone at a fixed width so ancestor flex/grid/
+  // overflow constraints can't clip or distort it. This is what fixes both the
+  // mid-line cutoff and the phantom blank trailing page.
+  const renderWidthPx = 816; // 8.5in @ 96dpi
+  const clone = document.createElement('div');
+  clone.style.position = 'fixed';
+  clone.style.top = '0';
+  clone.style.left = '-99999px';
+  clone.style.width = renderWidthPx + 'px';
+  clone.style.background = '#ffffff';
+  clone.style.border = 'none';
+  clone.style.borderRadius = '0';
+  clone.style.padding = '0';
+  clone.innerHTML = lc.innerHTML;
+  document.body.appendChild(clone);
+
   try {
     const { jsPDF } = window.jspdf;
     // US Letter, 1-inch (72pt) margins on all sides — standard for legal correspondence.
@@ -1124,20 +1130,14 @@ async function downloadPDF(){
     const marginPt = 72;
     const contentWidthPt = pageWidthPt - (marginPt * 2);
 
-    // Force the source element to a fixed, known pixel width so html2canvas
-    // renders it at a predictable size instead of whatever width the flex
-    // layout happens to give it on screen. This is what eliminates the
-    // blank-space-on-the-right issue.
-    const renderWidthPx = 816; // 8.5in at 96dpi
-    lc.style.width = renderWidthPx + 'px';
-
-    await pdf.html(lc, {
+    await pdf.html(clone, {
       x: marginPt,
       y: marginPt,
       width: contentWidthPt,
       windowWidth: renderWidthPx,
       autoPaging: 'text',
-      html2canvas: { scale: 0.75, useCORS: true, backgroundColor: '#ffffff', windowWidth: renderWidthPx },
+      html2canvas: { useCORS: true, backgroundColor: '#ffffff' },
+      margin: [marginPt, marginPt, marginPt, marginPt],
       callback: function(doc){
         doc.save('demand-letter-sueletter.pdf');
       }
@@ -1146,10 +1146,7 @@ async function downloadPDF(){
     console.error('PDF generation failed:', e);
     alert('Could not generate the PDF. Please try again.');
   } finally {
-    lc.style.border = prevBorder;
-    lc.style.borderRadius = prevRadius;
-    lc.style.padding = prevPadding;
-    lc.style.width = prevWidth;
+    document.body.removeChild(clone);
     if(btn){ btn.innerHTML = origText; btn.disabled = false; }
   }
 }

@@ -1036,7 +1036,7 @@ function renderLetterHTML(text){
     }
     while(i<lines.length&&lines[i].trim()==='')i++;
   }
-  return `<div style="background:white;padding:36px 40px;">${html}</div>`;
+  return `<div style="background:white;padding:0;">${html}</div>`;
 }
 
 /* ── LETTER ACTIONS ────────────────────────────────────────────── */
@@ -1141,7 +1141,6 @@ async function downloadPDF(){
       windowWidth: renderWidthPx,
       autoPaging: 'text',
       html2canvas: { useCORS: true, backgroundColor: '#ffffff' },
-      margin: [marginPt, marginPt, marginPt, marginPt],
       callback: function(doc){
         doc.save('demand-letter-sueletter.pdf');
       }

@@ -1036,7 +1036,7 @@ function renderLetterHTML(text){
     }
     while(i<lines.length&&lines[i].trim()==='')i++;
   }
-  return `<div style="background:white;padding:52px 60px;">${html}</div>`;
+  return `<div style="background:white;padding:36px 40px;">${html}</div>`;
 }
 
 /* ── LETTER ACTIONS ────────────────────────────────────────────── */
@@ -1094,6 +1094,15 @@ async function downloadPDF(){
   const origText = btn ? btn.innerHTML : '';
   if(btn){ btn.innerHTML = '⬇ Preparing PDF…'; btn.disabled = true; }
 
+  // Strip the on-screen border/rounded-corner/padding styling so it doesn't get
+  // baked into the exported PDF as a visible box. Restored in finally{}.
+  const prevBorder = lc.style.border;
+  const prevRadius = lc.style.borderRadius;
+  const prevPadding = lc.style.padding;
+  lc.style.border = 'none';
+  lc.style.borderRadius = '0';
+  lc.style.padding = '0';
+
   try {
     if(!window.jspdf){
       await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
@@ -1110,7 +1119,7 @@ async function downloadPDF(){
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ unit:'pt', format:'a4' });
     await pdf.html(lc, {
-      margin: [40,40,40,40],
+      margin: [0,0,0,0],
       autoPaging: 'text',
       html2canvas: { scale: 0.75, useCORS: true, backgroundColor: '#ffffff' },
       callback: function(doc){
@@ -1121,6 +1130,9 @@ async function downloadPDF(){
     console.error('PDF generation failed:', e);
     alert('Could not generate the PDF. Please try again.');
   } finally {
+    lc.style.border = prevBorder;
+    lc.style.borderRadius = prevRadius;
+    lc.style.padding = prevPadding;
     if(btn){ btn.innerHTML = origText; btn.disabled = false; }
   }
 }

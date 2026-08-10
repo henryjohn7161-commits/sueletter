@@ -1106,18 +1106,13 @@ async function downloadPDF(){
     return;
   }
 
-  const clone = document.createElement('div');
-  clone.style.cssText = 'position:fixed;left:-9999px;top:0;width:760px;background:#ffffff;padding:52px 60px;font-family:"Times New Roman",Georgia,serif;';
-  clone.innerHTML = lc.innerHTML;
-  document.body.appendChild(clone);
-
   try {
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ unit:'pt', format:'a4' });
-    await pdf.html(clone, {
+    await pdf.html(lc, {
       margin: [40,40,40,40],
       autoPaging: 'text',
-      html2canvas: { scale: 0.75, useCORS: true },
+      html2canvas: { scale: 0.75, useCORS: true, backgroundColor: '#ffffff' },
       callback: function(doc){
         doc.save('demand-letter-sueletter.pdf');
       }
@@ -1126,7 +1121,6 @@ async function downloadPDF(){
     console.error('PDF generation failed:', e);
     alert('Could not generate the PDF. Please try again.');
   } finally {
-    document.body.removeChild(clone);
     if(btn){ btn.innerHTML = origText; btn.disabled = false; }
   }
 }

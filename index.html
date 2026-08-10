@@ -1106,14 +1106,18 @@ async function downloadPDF(){
     return;
   }
 
-  // Build a detached, off-screen clone at a fixed width so ancestor flex/grid/
-  // overflow constraints can't clip or distort it. This is what fixes both the
-  // mid-line cutoff and the phantom blank trailing page.
+  // Build a detached clone at a fixed width, positioned at real on-screen
+  // coordinates (0,0) but pushed behind everything else with a low z-index.
+  // html2canvas builds its capture from the actual viewport/scroll coordinate
+  // space — elements placed way off-screen (e.g. left:-99999px) often render
+  // blank. Keeping it at (0,0) but behind everything avoids that while staying
+  // invisible to the user.
   const renderWidthPx = 816; // 8.5in @ 96dpi
   const clone = document.createElement('div');
   clone.style.position = 'fixed';
   clone.style.top = '0';
-  clone.style.left = '-99999px';
+  clone.style.left = '0';
+  clone.style.zIndex = '-9999';
   clone.style.width = renderWidthPx + 'px';
   clone.style.background = '#ffffff';
   clone.style.border = 'none';

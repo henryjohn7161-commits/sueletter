@@ -1099,6 +1099,7 @@ async function downloadPDF(){
   const prevBorder = lc.style.border;
   const prevRadius = lc.style.borderRadius;
   const prevPadding = lc.style.padding;
+  const prevWidth = lc.style.width;
   lc.style.border = 'none';
   lc.style.borderRadius = '0';
   lc.style.padding = '0';
@@ -1117,11 +1118,26 @@ async function downloadPDF(){
 
   try {
     const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({ unit:'pt', format:'a4' });
+    // US Letter, 1-inch (72pt) margins on all sides — standard for legal correspondence.
+    const pdf = new jsPDF({ unit:'pt', format:'letter' });
+    const pageWidthPt = pdf.internal.pageSize.getWidth();
+    const marginPt = 72;
+    const contentWidthPt = pageWidthPt - (marginPt * 2);
+
+    // Force the source element to a fixed, known pixel width so html2canvas
+    // renders it at a predictable size instead of whatever width the flex
+    // layout happens to give it on screen. This is what eliminates the
+    // blank-space-on-the-right issue.
+    const renderWidthPx = 816; // 8.5in at 96dpi
+    lc.style.width = renderWidthPx + 'px';
+
     await pdf.html(lc, {
-      margin: [0,0,0,0],
+      x: marginPt,
+      y: marginPt,
+      width: contentWidthPt,
+      windowWidth: renderWidthPx,
       autoPaging: 'text',
-      html2canvas: { scale: 0.75, useCORS: true, backgroundColor: '#ffffff' },
+      html2canvas: { scale: 0.75, useCORS: true, backgroundColor: '#ffffff', windowWidth: renderWidthPx },
       callback: function(doc){
         doc.save('demand-letter-sueletter.pdf');
       }
@@ -1133,6 +1149,7 @@ async function downloadPDF(){
     lc.style.border = prevBorder;
     lc.style.borderRadius = prevRadius;
     lc.style.padding = prevPadding;
+    lc.style.width = prevWidth;
     if(btn){ btn.innerHTML = origText; btn.disabled = false; }
   }
 }

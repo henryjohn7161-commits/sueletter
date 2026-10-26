@@ -51,7 +51,7 @@ Brief description provided by the user: "${dispute}"`;
         'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "llama-3.1-8b-instant", // hardcoded server-side — the client can no longer choose the model
+        model: "qwen/qwen3.8-27b", // hardcoded server-side — the client can no longer choose the model
         messages: [
           { role: 'system', content: 'You are a professional legal writing assistant. Output only the requested text, nothing else.' },
           { role: 'user', content: prompt }
